@@ -30,6 +30,7 @@ async def register(user: UserRegister):
             id=str(result.inserted_id),
             name=user.name,
             email=user.email,
+            roll=user.roll,
             role=user.role,
         ),
     )
@@ -63,6 +64,7 @@ async def login(user: UserLogin):
             id=str(db_user["_id"]),
             name=db_user["name"],
             email=db_user["email"],
+            roll=db_user["roll"],
             role=db_user["role"],
         ),
     )
@@ -74,5 +76,6 @@ async def get_me(current_user=Depends(get_current_user)):
         id=str(current_user["_id"]),
         name=current_user["name"],
         email=current_user["email"],
+        roll=current_user["roll"],
         role=current_user["role"],
     )
