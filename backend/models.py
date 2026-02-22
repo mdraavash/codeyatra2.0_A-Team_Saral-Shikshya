@@ -22,15 +22,3 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
-
-class QueryCreate(BaseModel):
-    course_id: int
-    student_id: str
-    question_text: str
-
-class QueryResponse(BaseModel):
-    id: int
-    question_text: str
-    answer_text: Optional[str] = None
-    status: str
-    created_at: datetime
