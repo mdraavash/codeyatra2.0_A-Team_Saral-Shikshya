@@ -27,8 +27,8 @@ export default function AskQuestion() {
 
   const [question, setQuestion] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [popup, setPopup] = useState<{ visible: boolean; success: boolean; message: string }>({
-    visible: false, success: false, message: '',
+  const [popup, setPopup] = useState<{ visible: boolean; type: 'success' | 'error' | 'warning' | null; message: string }>({
+    visible: false, type: null, message: '',
   });
 
   const handleSubmit = async () => {
@@ -45,22 +45,27 @@ export default function AskQuestion() {
         body: JSON.stringify({ course_id: courseId, question: trimmed }),
       });
       if (res.ok) {
-        setPopup({ visible: true, success: true, message: 'Your query has been sent to the teacher!' });
+        setPopup({ visible: true, type: 'success', message: 'Your query has been sent to the teacher!' });
         return;
       } else {
         const data = await res.json();
-        setPopup({ visible: true, success: false, message: data.detail || 'Something went wrong' });
+        if (data.moderation) {
+          setPopup({ visible: true, type: 'warning', message: data.detail || 'Your query was flagged as inappropriate.' });
+        } else {
+          setPopup({ visible: true, type: 'error', message: data.detail || 'Something went wrong' });
+        }
       }
     } catch {
-      setPopup({ visible: true, success: false, message: 'Network error. Please try again.' });
+      setPopup({ visible: true, type: 'error', message: 'Network error. Please try again.' });
     } finally {
       setSubmitting(false);
     }
   };
 
   const handlePopupDismiss = () => {
-    setPopup({ visible: false, success: false, message: '' });
-    if (popup.success) {
+    const wasSuccess = popup.type === 'success';
+    setPopup({ visible: false, type: null, message: '' });
+    if (wasSuccess) {
       router.replace('/(student)/' as never);
     }
   };
@@ -130,18 +135,26 @@ export default function AskQuestion() {
       <Modal transparent visible={popup.visible} animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <View style={[styles.modalIconWrap, popup.success ? styles.modalIconSuccess : styles.modalIconError]}>
+            <View style={[
+              styles.modalIconWrap,
+              popup.type === 'success' ? styles.modalIconSuccess
+                : popup.type === 'warning' ? styles.modalIconWarning
+                : styles.modalIconError,
+            ]}>
               <Ionicons
-                name={popup.success ? 'checkmark-circle' : 'close-circle'}
+                name={popup.type === 'success' ? 'checkmark-circle' : popup.type === 'warning' ? 'warning' : 'close-circle'}
                 size={48}
-                color={popup.success ? '#4ECDC4' : '#FF6B6B'}
+                color={popup.type === 'success' ? '#4ECDC4' : popup.type === 'warning' ? '#e67e22' : '#FF6B6B'}
               />
             </View>
             <Text style={styles.modalTitle}>
-              {popup.success ? 'Query Submitted' : 'Error'}
+              {popup.type === 'success' ? 'Query Submitted' : popup.type === 'warning' ? 'Warning' : 'Error'}
             </Text>
             <Text style={styles.modalMessage}>{popup.message}</Text>
-            <TouchableOpacity style={styles.modalBtn} onPress={handlePopupDismiss} activeOpacity={0.7}>
+            <TouchableOpacity style={[
+              styles.modalBtn,
+              popup.type === 'warning' && styles.modalBtnWarning,
+            ]} onPress={handlePopupDismiss} activeOpacity={0.7}>
               <Text style={styles.modalBtnText}>OK</Text>
             </TouchableOpacity>
           </View>
@@ -248,6 +261,7 @@ const styles = StyleSheet.create({
   },
   modalIconSuccess: { backgroundColor: 'rgba(78,205,196,0.12)' },
   modalIconError: { backgroundColor: 'rgba(255,107,107,0.12)' },
+  modalIconWarning: { backgroundColor: 'rgba(230,126,34,0.12)' },
   modalTitle: { fontSize: 22, fontWeight: '800', color: '#FFF', marginBottom: 8 },
   modalMessage: { fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
   modalBtn: {
@@ -255,6 +269,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 48,
     paddingVertical: 14,
     borderRadius: 16,
+  },
+  modalBtnWarning: {
+    backgroundColor: '#e67e22',
   },
   modalBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 });

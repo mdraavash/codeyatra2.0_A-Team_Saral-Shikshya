@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.responses import JSONResponse
 from bson import ObjectId
 from datetime import datetime, timezone
 from database import get_database
 from auth import get_current_user
 from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, RatingCreate, RatingResponse, TeacherRatingResponse
+from aimodels import moderate_text
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
@@ -46,6 +48,18 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     course = await db["courses"].find_one({"_id": ObjectId(body.course_id)})
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
+
+    # --- AI moderation check ---
+    moderation = moderate_text(body.question)
+    if moderation["blocked"] and moderation["confidence"] > 0.8:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "detail": f"Your query was flagged as {moderation['label'].lower()} content. Please rephrase your question appropriately.",
+                "moderation": True,
+                "label": moderation["label"],
+            },
+        )
 
     doc = {
         "course_id": body.course_id,

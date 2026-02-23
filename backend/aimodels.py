@@ -4,7 +4,7 @@ import re
 import time
 import numpy as np
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI, EmbeddingsGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
 load_dotenv()
 
@@ -19,7 +19,7 @@ llm = ChatGoogleGenerativeAI(
 )
 
 # Embedding model
-embeddings_model = EmbeddingsGoogleGenerativeAI(
+embeddings_model = GoogleGenerativeAIEmbeddings(
     model="textembedding-gecko-001",
     google_api_key=os.getenv("GOOGLE_API_KEY")
 )
@@ -27,7 +27,7 @@ embeddings_model = EmbeddingsGoogleGenerativeAI(
 # -----------------------------
 # Spam and moderation functions
 # -----------------------------
-CUSTOM_BAD_WORDS = ["muji","randi","machikne","fuck","bitch","idiot","stupid"]
+CUSTOM_BAD_WORDS = ["muji","randi","machikne","fuck","bitch","idiot","stupid","asshole"]
 
 def contains_custom_profanity(text):
     text_lower = text.lower()
@@ -100,32 +100,32 @@ Return ONLY valid JSON: {{"emotion":"CONFUSED","confidence":0.85}}
 def get_embedding(text):
     return embeddings_model.embed(text)
 
-# ---- Vector Search ----
-@app.get("/search")
-def search(query: str):
-    query_embedding = get_embedding(query)
+# # ---- Vector Search ----
+# @app.get("/search")
+# def search(query: str):
+#     query_embedding = get_embedding(query)
 
-    results = collection.aggregate([
-        {
-            "$vectorSearch": {
-                "index": "default",
-                "path": "embedding",
-                "queryVector": query_embedding,
-                "numCandidates": 100,
-                "limit": 5
-            }
-        },
-        {
-            "$project": {
-                "_id": 0,
-                "title": 1,
-                "content": 1,
-                "score": {"$meta": "vectorSearchScore"}
-            }
-        }
-    ])
+#     results = collection.aggregate([
+#         {
+#             "$vectorSearch": {
+#                 "index": "default",
+#                 "path": "embedding",
+#                 "queryVector": query_embedding,
+#                 "numCandidates": 100,
+#                 "limit": 5
+#             }
+#         },
+#         {
+#             "$project": {
+#                 "_id": 0,
+#                 "title": 1,
+#                 "content": 1,
+#                 "score": {"$meta": "vectorSearchScore"}
+#             }
+#         }
+#     ])
 
-    return {"results": list(results)}
+    # return {"results": list(results)}
 
 # -----------------------------
 # Question clustering (optional)
@@ -147,3 +147,4 @@ Questions: {question_list}
         return json.loads(content)
     except:
         return []
+    
