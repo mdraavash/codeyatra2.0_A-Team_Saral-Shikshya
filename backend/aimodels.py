@@ -88,6 +88,44 @@ Return ONLY valid JSON: {{"emotion":"CONFUSED","confidence":0.85}}
     except:
         return {"emotion":"NEUTRAL","confidence":0}
 
+# Subject Detection
+def detect_subject_relevance(question: str, course_name: str):
+    """
+    Determine if a question is relevant to the course subject.
+    Returns: {"is_relevant": bool, "confidence": float, "reason": str}
+    """
+    prompt = f"""
+You are an AI that validates if student questions are relevant to their course subject.
+
+Course Subject: "{course_name}"
+Student Question: "{question}"
+
+Determine if the question is asking about topics related to {course_name}.
+Consider the question relevant if it:
+- Directly asks about concepts in {course_name}
+- Asks for clarification on course material
+- Seeks help with assignments or problems related to {course_name}
+- Discusses course topics
+
+Return ONLY valid JSON like:
+{{"is_relevant": true, "confidence": 0.92, "reason": "Question directly asks about..."}}
+"""
+    try:
+        response = llm.invoke(prompt)
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json","").replace("```","").strip()
+        parsed = json.loads(content)
+        return {
+            "is_relevant": bool(parsed.get("is_relevant", False)),
+            "confidence": float(parsed.get("confidence", 0)),
+            "reason": parsed.get("reason", "")
+        }
+    except Exception as e:
+        # If there's an error, be lenient and allow the question
+        return {"is_relevant": True, "confidence": 0.0, "reason": "Could not validate"}
+
+
 # Embedding utilities
 def get_embedding(text):
     return embeddings_model.embed(text)

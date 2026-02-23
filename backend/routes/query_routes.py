@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from database import get_database
 from auth import get_current_user
 from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, EmbeddedQuestionResponse
-from aimodels import moderate_text, get_embedding, find_best_match
-from config import EMBEDDING_SIMILARITY_THRESHOLD, EMBEDDING_SEARCH_CANDIDATES
+from aimodels import moderate_text, get_embedding, find_best_match, detect_subject_relevance
+from config import EMBEDDING_SIMILARITY_THRESHOLD, EMBEDDING_SEARCH_CANDIDATES, SUBJECT_VALIDATION_ENABLED, SUBJECT_VALIDATION_CONFIDENCE_THRESHOLD
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
@@ -79,6 +79,19 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
                 "label": moderation["label"],
             },
         )
+
+    # --- Subject validation check ---
+    if SUBJECT_VALIDATION_ENABLED:
+        subject_check = detect_subject_relevance(body.question, course["name"])
+        if not subject_check["is_relevant"] and subject_check["confidence"] > SUBJECT_VALIDATION_CONFIDENCE_THRESHOLD:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": f"Your question doesn't seem to be about {course['name']}. Please ask questions related to the course subject.",
+                    "subject_invalid": True,
+                    "reason": subject_check.get("reason", ""),
+                },
+            )
 
     # --- Embedding check for existing FAQ ---
     try:

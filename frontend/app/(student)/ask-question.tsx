@@ -27,7 +27,12 @@ export default function AskQuestion() {
 
   const [question, setQuestion] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [popup, setPopup] = useState<{ visible: boolean; type: 'success' | 'error' | 'warning' | null; message: string }>({
+  const [popup, setPopup] = useState<{ 
+    visible: boolean; 
+    type: 'success' | 'error' | 'warning' | 'faq' | 'subject-invalid' | null; 
+    message: string;
+    faqAnswer?: string;
+  }>({
     visible: false, type: null, message: '',
   });
 
@@ -44,13 +49,27 @@ export default function AskQuestion() {
         },
         body: JSON.stringify({ course_id: courseId, question: trimmed }),
       });
+      
+      const data = await res.json();
+      
       if (res.ok) {
-        setPopup({ visible: true, type: 'success', message: 'Your query has been sent to the teacher!' });
+        // Check if this is a FAQ match response
+        if (data.matched && data.faq) {
+          setPopup({ 
+            visible: true, 
+            type: 'faq', 
+            message: 'We found a similar question that was already answered!',
+            faqAnswer: data.faq.answer || 'No answer available yet.'
+          });
+        } else {
+          setPopup({ visible: true, type: 'success', message: 'Your query has been sent to the teacher!' });
+        }
         return;
       } else {
-        const data = await res.json();
         if (data.moderation) {
           setPopup({ visible: true, type: 'warning', message: data.detail || 'Your query was flagged as inappropriate.' });
+        } else if (data.subject_invalid) {
+          setPopup({ visible: true, type: 'subject-invalid', message: data.detail || 'This question is not related to the course subject.' });
         } else {
           setPopup({ visible: true, type: 'error', message: data.detail || 'Something went wrong' });
         }
@@ -139,23 +158,46 @@ export default function AskQuestion() {
               styles.modalIconWrap,
               popup.type === 'success' ? styles.modalIconSuccess
                 : popup.type === 'warning' ? styles.modalIconWarning
+                : popup.type === 'faq' ? styles.modalIconFaq
+                : popup.type === 'subject-invalid' ? styles.modalIconWarning
                 : styles.modalIconError,
             ]}>
               <Ionicons
-                name={popup.type === 'success' ? 'checkmark-circle' : popup.type === 'warning' ? 'warning' : 'close-circle'}
+                name={popup.type === 'success' ? 'checkmark-circle' : 
+                     popup.type === 'warning' ? 'warning' : 
+                     popup.type === 'faq' ? 'bulb' :
+                     popup.type === 'subject-invalid' ? 'alert-circle' :
+                     'close-circle'}
                 size={48}
-                color={popup.type === 'success' ? '#4ECDC4' : popup.type === 'warning' ? '#e67e22' : '#FF6B6B'}
+                color={popup.type === 'success' ? '#4ECDC4' : 
+                       popup.type === 'warning' ? '#e67e22' : 
+                       popup.type === 'faq' ? '#4ECDC4' :
+                       popup.type === 'subject-invalid' ? '#e67e22' :
+                       '#FF6B6B'}
               />
             </View>
             <Text style={styles.modalTitle}>
-              {popup.type === 'success' ? 'Query Submitted' : popup.type === 'warning' ? 'Warning' : 'Error'}
+              {popup.type === 'success' ? 'Query Submitted' : 
+               popup.type === 'warning' ? 'Warning' : 
+               popup.type === 'faq' ? 'Similar Question Found' :
+               popup.type === 'subject-invalid' ? 'Off-Topic Question' :
+               'Error'}
             </Text>
             <Text style={styles.modalMessage}>{popup.message}</Text>
+            {popup.type === 'faq' && popup.faqAnswer && (
+              <View style={styles.faqAnswerBox}>
+                <Text style={styles.faqAnswerLabel}>📚 Answer:</Text>
+                <Text style={styles.faqAnswerText}>{popup.faqAnswer}</Text>
+              </View>
+            )}
             <TouchableOpacity style={[
               styles.modalBtn,
-              popup.type === 'warning' && styles.modalBtnWarning,
+              (popup.type === 'warning' || popup.type === 'subject-invalid') && styles.modalBtnWarning,
+              popup.type === 'faq' && styles.modalBtnFaq,
             ]} onPress={handlePopupDismiss} activeOpacity={0.7}>
-              <Text style={styles.modalBtnText}>OK</Text>
+              <Text style={styles.modalBtnText}>
+                {popup.type === 'faq' ? 'Got It' : 'OK'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -266,8 +308,20 @@ const styles = StyleSheet.create({
   modalIconSuccess: { backgroundColor: 'rgba(78,205,196,0.12)' },
   modalIconError: { backgroundColor: 'rgba(255,107,107,0.12)' },
   modalIconWarning: { backgroundColor: 'rgba(230,126,34,0.12)' },
+  modalIconFaq: { backgroundColor: 'rgba(78,205,196,0.12)' },
   modalTitle: { fontSize: 22, fontWeight: '800', color: '#FFF', marginBottom: 8 },
   modalMessage: { fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
+  faqAnswerBox: {
+    backgroundColor: 'rgba(78,205,196,0.1)',
+    borderLeftWidth: 3,
+    borderLeftColor: '#4ECDC4',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 20,
+    marginHorizontal: -8,
+  },
+  faqAnswerLabel: { fontSize: 12, fontWeight: '600', color: '#4ECDC4', marginBottom: 6 },
+  faqAnswerText: { fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 18 },
   modalBtn: {
     backgroundColor: '#0A3B87',
     paddingHorizontal: 48,
@@ -276,6 +330,9 @@ const styles = StyleSheet.create({
   },
   modalBtnWarning: {
     backgroundColor: '#e67e22',
+  },
+  modalBtnFaq: {
+    backgroundColor: '#4ECDC4',
   },
   modalBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 });
