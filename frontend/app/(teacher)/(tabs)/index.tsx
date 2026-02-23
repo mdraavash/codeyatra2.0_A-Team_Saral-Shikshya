@@ -32,7 +32,7 @@ interface Notification {
   created_at: string;
 }
 
-const SUBJECT_COLORS = ['#6C63FF', '#4ECDC4', '#FF6B6B', '#FFD93D', '#45B7D1', '#96CEB4', '#FF8A65', '#AB47BC'];
+const SUBJECT_COLORS = ['#0A3B87', '#2ecc71', '#e74c3c', '#FFD700', '#45B7D1', '#96CEB4', '#FF8A65', '#AB47BC'];
 const SUBJECT_ICONS: (keyof typeof MaterialCommunityIcons.glyphMap)[] = [
   'atom', 'brain', 'code-braces', 'flask', 'calculator-variant', 'chip', 'database', 'earth',
 ];
@@ -84,7 +84,7 @@ export default function TeacherHome() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#6C63FF" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#444" style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -94,7 +94,7 @@ export default function TeacherHome() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6C63FF" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#444" />}
       >
         {/* Header Card */}
         <View style={styles.headerCard}>
@@ -118,12 +118,12 @@ export default function TeacherHome() {
             }}
           >
             <View style={styles.alertIconWrap}>
-              <Ionicons name="notifications" size={18} color="#FFD93D" />
+              <Ionicons name="notifications" size={18} color="#FFD700" />
             </View>
             <Text style={styles.alertText}>
               You have {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
             </Text>
-            <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.5)" />
+            <Ionicons name="chevron-forward" size={18} color="#888" />
           </TouchableOpacity>
         )}
 
@@ -140,7 +140,7 @@ export default function TeacherHome() {
               >
                 <View style={[styles.notifDot, !notif.read && styles.notifDotActive]} />
                 <Text style={styles.notifText} numberOfLines={1}>{notif.message}</Text>
-                <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
+                <Ionicons name="chevron-forward" size={18} color="#B7B7B7" />
               </TouchableOpacity>
             ))}
           </>
@@ -150,7 +150,7 @@ export default function TeacherHome() {
         <Text style={styles.sectionTitle}>Subjects</Text>
         {subjects.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="book-outline" size={40} color="#555" />
+            <Ionicons name="book-outline" size={40} color="#888" />
             <Text style={styles.emptyText}>No subjects assigned yet</Text>
           </View>
         ) : (
@@ -174,7 +174,7 @@ export default function TeacherHome() {
                     <MaterialCommunityIcons name={icon} size={28} color={color} />
                   </View>
                   <Text style={styles.subjectName} numberOfLines={2}>{subj.name}</Text>
-                  <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.3)" style={{ marginTop: 4 }} />
+                  <Ionicons name="chevron-forward" size={14} color="#B7B7B7" style={{ marginTop: 4 }} />
                 </TouchableOpacity>
               );
             })}
@@ -191,86 +191,99 @@ const GRID_PAD = 20;
 const CARD_W = (width - GRID_PAD * 2 - CARD_GAP) / 2;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 110 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
 
   /* Header */
   headerCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#F5F5F5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   headerAvatar: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#0A3B87',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
   },
   avatarText: { fontSize: 24, fontWeight: '700', color: '#FFF' },
-  headerName: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4, letterSpacing: 0.3 },
+  headerName: { fontSize: 22, fontWeight: '600', color: '#FFFFFF', lineHeight: 33 },
+  headerSub: { fontSize: 12, color: '#FFFFFF', marginTop: 2, letterSpacing: 0.18 },
 
   /* Alert */
   alertBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 217, 61, 0.1)',
-    borderRadius: 14,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginTop: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 217, 61, 0.2)',
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFD700',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   alertIconWrap: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 217, 61, 0.15)',
+    backgroundColor: 'rgba(255, 215, 0, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
-  alertText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#FFD93D' },
+  alertText: { flex: 1, fontSize: 13, fontWeight: '600', color: '#2F2F2F' },
 
   /* Section */
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#FFFFFF',
+    letterSpacing: 0.21,
     marginTop: 24,
     marginBottom: 14,
-    letterSpacing: 0.3,
   },
 
   /* Notification */
   notifCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#16213E',
-    borderRadius: 14,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  notifUnread: { borderColor: 'rgba(108,99,255,0.25)' },
+  notifUnread: { borderLeftWidth: 4, borderLeftColor: '#FFD700' },
   notifDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: '#B7B7B7',
     marginRight: 12,
   },
-  notifDotActive: { backgroundColor: '#6C63FF' },
-  notifText: { flex: 1, fontSize: 13, fontWeight: '500', color: 'rgba(255,255,255,0.8)' },
+  notifDotActive: { backgroundColor: '#FFD700' },
+  notifText: { flex: 1, fontSize: 14, fontWeight: '600', color: '#2F2F2F', letterSpacing: 0.21 },
 
   /* Subjects Grid */
   subjectsGrid: {
@@ -280,12 +293,16 @@ const styles = StyleSheet.create({
   },
   subjectCard: {
     width: CARD_W,
-    backgroundColor: '#16213E',
-    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 25,
     padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    justifyContent: 'center',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   subjectIconWrap: {
     width: 52,
@@ -295,16 +312,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  subjectName: { fontSize: 14, fontWeight: '600', color: '#FFF', textAlign: 'center' },
+  subjectName: { fontSize: 14, fontWeight: '600', color: '#2F2F2F', textAlign: 'center' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
     padding: 40,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  emptyText: { fontSize: 14, color: '#666', marginTop: 12 },
+  emptyText: { fontSize: 14, color: '#888', marginTop: 12 },
 });

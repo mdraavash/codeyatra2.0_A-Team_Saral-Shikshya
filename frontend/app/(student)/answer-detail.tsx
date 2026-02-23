@@ -99,7 +99,7 @@ export default function AnswerDetail() {
             <Ionicons
               name={star <= rating ? 'star' : 'star-outline'}
               size={interactive ? 36 : 20}
-              color={star <= rating ? '#FFD93D' : '#555'}
+              color={star <= rating ? '#FFD700' : '#B7B7B7'}
             />
           </TouchableOpacity>
         ))}
@@ -125,7 +125,7 @@ export default function AnswerDetail() {
         {/* Question Section */}
         <View style={styles.section}>
           <View style={styles.sectionLabelRow}>
-            <Ionicons name="help-circle" size={18} color="#6C63FF" />
+            <Ionicons name="help-circle" size={18} color="#0A3B87" />
             <Text style={styles.sectionLabel}>Question</Text>
           </View>
           <Text style={styles.questionText}>{question}</Text>
@@ -134,8 +134,8 @@ export default function AnswerDetail() {
         {/* Answer Section */}
         <View style={styles.section}>
           <View style={styles.sectionLabelRow}>
-            <Ionicons name="chatbubble-ellipses" size={18} color="#4ECDC4" />
-            <Text style={[styles.sectionLabel, { color: '#4ECDC4' }]}>Answer</Text>
+            <Ionicons name="chatbubble-ellipses" size={18} color="#2ecc71" />
+            <Text style={[styles.sectionLabel, { color: '#2ecc71' }]}>Answer</Text>
           </View>
           <Text style={styles.answerText}>{answer}</Text>
         </View>
@@ -155,7 +155,7 @@ export default function AnswerDetail() {
           </Text>
 
           {loadingRating ? (
-            <ActivityIndicator color="#6C63FF" style={{ marginTop: 20 }} />
+            <ActivityIndicator color="#444" style={{ marginTop: 20 }} />
           ) : (
             <>
               {renderStars(true)}
@@ -188,7 +188,7 @@ export default function AnswerDetail() {
 
               {existingRating && rating === existingRating && (
                 <View style={styles.submittedBadge}>
-                  <Ionicons name="checkmark-circle" size={18} color="#4ECDC4" />
+                  <Ionicons name="checkmark-circle" size={18} color="#2ecc71" />
                   <Text style={styles.submittedText}>Rating submitted</Text>
                 </View>
               )}
@@ -201,7 +201,7 @@ export default function AnswerDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
 
   /* Header */
   headerBar: {
@@ -210,30 +210,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomColor: '#444444',
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitleWrap: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
-  headerSubtitle: { fontSize: 12, color: '#6C63FF', marginTop: 2 },
+  headerSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
 
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 20, paddingBottom: 40 },
 
   /* Sections */
   section: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 20,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sectionLabelRow: {
     flexDirection: 'row',
@@ -244,42 +247,45 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#6C63FF',
+    color: '#0A3B87',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
   questionText: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#2F2F2F',
     lineHeight: 26,
   },
   answerText: {
     fontSize: 16,
-    color: '#C8C8C8',
+    color: '#888',
     lineHeight: 26,
   },
 
   /* Divider */
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: '#444444',
     marginVertical: 8,
   },
 
   /* Rating Section */
   ratingSection: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   ratingTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#2F2F2F',
     marginBottom: 6,
   },
   ratingSubtitle: {
@@ -299,14 +305,14 @@ const styles = StyleSheet.create({
   ratingLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFD93D',
+    color: '#FFD700',
     marginBottom: 20,
   },
   submitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#0A3B87',
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 25,
@@ -328,11 +334,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(78, 205, 196, 0.1)',
+    backgroundColor: 'rgba(46, 204, 113, 0.1)',
   },
   submittedText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4ECDC4',
+    color: '#2ecc71',
   },
 });

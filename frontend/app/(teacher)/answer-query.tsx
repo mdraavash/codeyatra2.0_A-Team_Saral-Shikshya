@@ -96,7 +96,7 @@ export default function AnswerQuery() {
           {/* Question */}
           <Text style={styles.sectionTitle}>Student&apos;s Question</Text>
           <View style={styles.questionCard}>
-            <Ionicons name="help-circle-outline" size={20} color="#6C63FF" style={{ marginRight: 10 }} />
+            <Ionicons name="help-circle-outline" size={20} color="#0A3B87" style={{ marginRight: 10 }} />
             <Text style={styles.questionText}>{question}</Text>
           </View>
 
@@ -105,7 +105,7 @@ export default function AnswerQuery() {
           <TextInput
             style={styles.answerInput}
             placeholder="Type your answer here..."
-            placeholderTextColor="rgba(255,255,255,0.25)"
+            placeholderTextColor="#888"
             value={answer}
             onChangeText={setAnswer}
             multiline
@@ -135,7 +135,7 @@ export default function AnswerQuery() {
               <Ionicons
                 name={popup.success ? 'checkmark-circle' : 'close-circle'}
                 size={48}
-                color={popup.success ? '#4ECDC4' : '#FF6B6B'}
+                color={popup.success ? '#2ecc71' : '#e74c3c'}
               />
             </View>
             <Text style={styles.modalTitle}>
@@ -153,8 +153,8 @@ export default function AnswerQuery() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 60, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
@@ -164,40 +164,45 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   /* Header */
   headerCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#F5F5F5',
     marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   headerBadge: {
-    backgroundColor: 'rgba(108,99,255,0.15)',
+    backgroundColor: '#0A3B87',
     paddingHorizontal: 14,
     paddingVertical: 4,
     borderRadius: 10,
     marginBottom: 10,
   },
-  headerBadgeText: { fontSize: 12, fontWeight: '700', color: '#6C63FF' },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF' },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
+  headerBadgeText: { fontSize: 12, fontWeight: '700', color: '#FFF' },
+  headerTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
+  headerSub: { fontSize: 13, color: '#FFFFFF', marginTop: 4 },
 
   /* Section */
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '700',
-    color: 'rgba(255,255,255,0.6)',
+    fontWeight: '600',
+    color: '#FFFFFF',
     marginTop: 22,
     marginBottom: 10,
-    letterSpacing: 0.5,
+    letterSpacing: 0.21,
     textTransform: 'uppercase',
   },
 
@@ -205,26 +210,34 @@ const styles = StyleSheet.create({
   questionCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  questionText: { flex: 1, fontSize: 15, fontWeight: '500', color: '#FFF', lineHeight: 22 },
+  questionText: { flex: 1, fontSize: 15, fontWeight: '500', color: '#2F2F2F', lineHeight: 22 },
 
   /* Answer */
   answerInput: {
     width: '100%',
     minHeight: 160,
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 16,
     fontSize: 15,
-    color: '#FFF',
+    color: '#2F2F2F',
     lineHeight: 22,
     borderWidth: 1,
-    borderColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#F5F5F5',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
   /* Submit */
@@ -232,9 +245,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6C63FF',
-    height: 54,
-    borderRadius: 16,
+    backgroundColor: '#0A3B87',
+    height: 50,
+    borderRadius: 25,
     marginTop: 24,
     gap: 8,
   },
@@ -251,12 +264,15 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalIconWrap: {
     width: 80,
@@ -266,15 +282,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  modalIconSuccess: { backgroundColor: 'rgba(78,205,196,0.12)' },
-  modalIconError: { backgroundColor: 'rgba(255,107,107,0.12)' },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: '#FFF', marginBottom: 8 },
-  modalMessage: { fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
+  modalIconSuccess: { backgroundColor: 'rgba(46,204,113,0.12)' },
+  modalIconError: { backgroundColor: 'rgba(231,76,60,0.12)' },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: '#2F2F2F', marginBottom: 8 },
+  modalMessage: { fontSize: 14, color: '#888', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
   modalBtn: {
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#0A3B87',
     paddingHorizontal: 48,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: 25,
   },
   modalBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 });

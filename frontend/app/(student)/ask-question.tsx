@@ -86,7 +86,7 @@ export default function AskQuestion() {
         <View style={styles.body}>
           {/* Course Info */}
           <View style={styles.courseInfoRow}>
-            <Ionicons name="book-outline" size={18} color="#6C63FF" />
+            <Ionicons name="book-outline" size={18} color="#0A3B87" />
             <Text style={styles.courseInfoText}>{courseName}</Text>
             <Text style={styles.teacherInfoText}>by {teacherName}</Text>
           </View>
@@ -96,7 +96,7 @@ export default function AskQuestion() {
             <TextInput
               style={styles.input}
               placeholder="Type your question here..."
-              placeholderTextColor="#555"
+              placeholderTextColor="#888"
               value={question}
               onChangeText={setQuestion}
               multiline
@@ -134,7 +134,7 @@ export default function AskQuestion() {
               <Ionicons
                 name={popup.success ? 'checkmark-circle' : 'close-circle'}
                 size={48}
-                color={popup.success ? '#4ECDC4' : '#FF6B6B'}
+                color={popup.success ? '#2ecc71' : '#e74c3c'}
               />
             </View>
             <Text style={styles.modalTitle}>
@@ -152,7 +152,7 @@ export default function AskQuestion() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
 
   headerBar: {
     flexDirection: 'row',
@@ -160,19 +160,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomColor: '#444444',
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitleWrap: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
-  headerSubtitle: { fontSize: 12, color: '#6C63FF', marginTop: 2 },
+  headerSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
 
   body: { flex: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 30 },
 
@@ -180,29 +180,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(108, 99, 255, 0.08)',
-    borderRadius: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(108, 99, 255, 0.15)',
   },
-  courseInfoText: { fontSize: 14, fontWeight: '600', color: '#6C63FF' },
+  courseInfoText: { fontSize: 14, fontWeight: '600', color: '#0A3B87' },
   teacherInfoText: { fontSize: 13, color: '#888' },
 
   inputCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 4,
     minHeight: 200,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#2F2F2F',
     padding: 16,
     lineHeight: 24,
     minHeight: 192,
@@ -213,9 +214,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    backgroundColor: '#6C63FF',
-    height: 56,
-    borderRadius: 28,
+    backgroundColor: '#0A3B87',
+    height: 50,
+    borderRadius: 25,
     marginTop: 16,
   },
   submitBtnDisabled: { opacity: 0.4 },
@@ -231,12 +232,15 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalIconWrap: {
     width: 80,
@@ -246,15 +250,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  modalIconSuccess: { backgroundColor: 'rgba(78,205,196,0.12)' },
-  modalIconError: { backgroundColor: 'rgba(255,107,107,0.12)' },
-  modalTitle: { fontSize: 22, fontWeight: '800', color: '#FFF', marginBottom: 8 },
-  modalMessage: { fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
+  modalIconSuccess: { backgroundColor: 'rgba(46,204,113,0.12)' },
+  modalIconError: { backgroundColor: 'rgba(231,76,60,0.12)' },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: '#2F2F2F', marginBottom: 8 },
+  modalMessage: { fontSize: 14, color: '#888', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
   modalBtn: {
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#0A3B87',
     paddingHorizontal: 48,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: 25,
   },
   modalBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 });

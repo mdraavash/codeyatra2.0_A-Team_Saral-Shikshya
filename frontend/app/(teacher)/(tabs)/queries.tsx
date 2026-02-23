@@ -72,23 +72,23 @@ export default function TeacherQueries() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6C63FF" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#444" />}
       >
         {/* Title */}
         <Text style={styles.screenTitle}>Queries</Text>
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: 'rgba(255,107,107,0.2)' }]}>
-            <Text style={[styles.statNum, { color: '#FF6B6B' }]}>{pendingCount}</Text>
+          <View style={[styles.statCard, { borderColor: '#F5F5F5' }]}>
+            <Text style={[styles.statNum, { color: '#e67e22' }]}>{pendingCount}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
-          <View style={[styles.statCard, { borderColor: 'rgba(78,205,196,0.2)' }]}>
-            <Text style={[styles.statNum, { color: '#4ECDC4' }]}>{answeredCount}</Text>
+          <View style={[styles.statCard, { borderColor: '#F5F5F5' }]}>
+            <Text style={[styles.statNum, { color: '#2ecc71' }]}>{answeredCount}</Text>
             <Text style={styles.statLabel}>Answered</Text>
           </View>
-          <View style={[styles.statCard, { borderColor: 'rgba(108,99,255,0.2)' }]}>
-            <Text style={[styles.statNum, { color: '#6C63FF' }]}>{queries.length}</Text>
+          <View style={[styles.statCard, { borderColor: '#F5F5F5' }]}>
+            <Text style={[styles.statNum, { color: '#0A3B87' }]}>{queries.length}</Text>
             <Text style={styles.statLabel}>Total</Text>
           </View>
         </View>
@@ -111,10 +111,10 @@ export default function TeacherQueries() {
 
         {/* Query List */}
         {loading ? (
-          <ActivityIndicator color="#6C63FF" style={{ marginTop: 40 }} />
+          <ActivityIndicator color="#444" style={{ marginTop: 40 }} />
         ) : queries.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="checkmark-circle-outline" size={48} color="#4ECDC4" />
+            <Ionicons name="checkmark-circle-outline" size={48} color="#2ecc71" />
             <Text style={styles.emptyTitle}>All caught up!</Text>
             <Text style={styles.emptyText}>No {filter === 'pending' ? 'pending' : ''} queries</Text>
           </View>
@@ -149,12 +149,12 @@ export default function TeacherQueries() {
                 <Text style={styles.queryStudent}>from {q.student_roll || q.student_name}</Text>
                 {q.answered ? (
                   <View style={styles.answeredBadge}>
-                    <Ionicons name="checkmark-circle" size={14} color="#4ECDC4" />
+                    <Ionicons name="checkmark-circle" size={14} color="#2ecc71" />
                     <Text style={styles.answeredBadgeText}>Answered</Text>
                   </View>
                 ) : (
                   <View style={styles.pendingBadge}>
-                    <Ionicons name="time" size={14} color="#FF6B6B" />
+                    <Ionicons name="time" size={14} color="#e67e22" />
                     <Text style={styles.pendingBadgeText}>Pending</Text>
                   </View>
                 )}
@@ -168,23 +168,28 @@ export default function TeacherQueries() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 110 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
 
-  screenTitle: { fontSize: 28, fontWeight: '800', color: '#FFF', marginBottom: 16 },
+  screenTitle: { fontSize: 22, fontWeight: '600', color: '#FFF', marginBottom: 16 },
 
   /* Stats */
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   statCard: {
     flex: 1,
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statNum: { fontSize: 24, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4, fontWeight: '600' },
+  statLabel: { fontSize: 11, color: '#888', marginTop: 4, fontWeight: '600' },
 
   /* Filter */
   filterRow: { flexDirection: 'row', gap: 10, marginBottom: 18 },
@@ -192,50 +197,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#16213E',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#F5F5F5',
   },
-  chipActive: { backgroundColor: '#6C63FF', borderColor: '#6C63FF' },
-  chipText: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.5)' },
+  chipActive: { backgroundColor: '#0A3B87' },
+  chipText: { fontSize: 13, fontWeight: '600', color: '#888' },
   chipTextActive: { color: '#FFF' },
 
   /* Query Card */
   queryCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   queryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   queryCourseBadge: {
-    backgroundColor: 'rgba(108,99,255,0.15)',
+    backgroundColor: '#0A3B87',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 10,
   },
-  queryCourseBadgeText: { fontSize: 11, fontWeight: '700', color: '#6C63FF' },
-  queryTime: { fontSize: 11, color: 'rgba(255,255,255,0.35)' },
-  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#FFF', lineHeight: 22, marginBottom: 12 },
+  queryCourseBadgeText: { fontSize: 11, fontWeight: '700', color: '#FFF' },
+  queryTime: { fontSize: 11, color: '#B7B7B7' },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#2F2F2F', lineHeight: 22, marginBottom: 12 },
   queryFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  queryStudent: { fontSize: 12, color: 'rgba(255,255,255,0.4)' },
+  queryStudent: { fontSize: 12, color: '#888' },
   answeredBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  answeredBadgeText: { fontSize: 12, fontWeight: '600', color: '#4ECDC4' },
+  answeredBadgeText: { fontSize: 12, fontWeight: '600', color: '#2ecc71' },
   pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  pendingBadgeText: { fontSize: 12, fontWeight: '600', color: '#FF6B6B' },
+  pendingBadgeText: { fontSize: 12, fontWeight: '600', color: '#e67e22' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 18,
     padding: 48,
     alignItems: 'center',
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#FFF', marginTop: 16 },
-  emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#2F2F2F', marginTop: 16 },
+  emptyText: { fontSize: 13, color: '#888', marginTop: 6 },
 });

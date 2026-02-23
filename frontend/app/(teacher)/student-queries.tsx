@@ -72,16 +72,16 @@ export default function StudentQueries() {
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: 'rgba(108,99,255,0.2)' }]}>
-            <Text style={[styles.statNum, { color: '#6C63FF' }]}>{queries.length}</Text>
+          <View style={[styles.statCard, { borderColor: '#F5F5F5' }]}>
+            <Text style={[styles.statNum, { color: '#0A3B87' }]}>{queries.length}</Text>
             <Text style={styles.statLabel}>Total</Text>
           </View>
-          <View style={[styles.statCard, { borderColor: 'rgba(78,205,196,0.2)' }]}>
-            <Text style={[styles.statNum, { color: '#4ECDC4' }]}>{answeredCount}</Text>
+          <View style={[styles.statCard, { borderColor: '#F5F5F5' }]}>
+            <Text style={[styles.statNum, { color: '#2ecc71' }]}>{answeredCount}</Text>
             <Text style={styles.statLabel}>Answered</Text>
           </View>
-          <View style={[styles.statCard, { borderColor: 'rgba(255,107,107,0.2)' }]}>
-            <Text style={[styles.statNum, { color: '#FF6B6B' }]}>{pendingCount}</Text>
+          <View style={[styles.statCard, { borderColor: '#F5F5F5' }]}>
+            <Text style={[styles.statNum, { color: '#e67e22' }]}>{pendingCount}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
         </View>
@@ -90,10 +90,10 @@ export default function StudentQueries() {
         <Text style={styles.sectionTitle}>Questions</Text>
 
         {loading ? (
-          <ActivityIndicator color="#6C63FF" style={{ marginTop: 30 }} />
+          <ActivityIndicator color="#444" style={{ marginTop: 30 }} />
         ) : queries.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="chatbubble-outline" size={44} color="#555" />
+            <Ionicons name="chatbubble-outline" size={44} color="#888" />
             <Text style={styles.emptyText}>No questions from this student</Text>
           </View>
         ) : (
@@ -131,18 +131,18 @@ export default function StudentQueries() {
               {q.answered ? (
                 <View style={styles.queryFooter}>
                   <View style={styles.answeredBadge}>
-                    <Ionicons name="checkmark-circle" size={14} color="#4ECDC4" />
+                    <Ionicons name="checkmark-circle" size={14} color="#2ecc71" />
                     <Text style={styles.answeredText}>Answered</Text>
                   </View>
                   <View style={styles.editHint}>
-                    <Ionicons name="create-outline" size={14} color="#6C63FF" />
+                    <Ionicons name="create-outline" size={14} color="#0A3B87" />
                     <Text style={styles.editHintText}>Edit</Text>
                   </View>
                 </View>
               ) : (
                 <View style={styles.queryFooter}>
                   <View style={styles.pendingBadge}>
-                    <Ionicons name="time" size={14} color="#FF6B6B" />
+                    <Ionicons name="time" size={14} color="#e67e22" />
                     <Text style={styles.pendingText}>Pending</Text>
                   </View>
                   <View style={styles.answerHint}>
@@ -159,8 +159,8 @@ export default function StudentQueries() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 60, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
@@ -170,72 +170,83 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   /* Header */
   headerCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#F5F5F5',
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF' },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
+  headerTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
+  headerSub: { fontSize: 13, color: '#FFFFFF', marginTop: 4 },
 
   /* Stats */
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   statCard: {
     flex: 1,
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statNum: { fontSize: 22, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, fontWeight: '600' },
+  statLabel: { fontSize: 11, color: '#888', marginTop: 4, fontWeight: '600' },
 
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#FFF', marginBottom: 14 },
+  sectionTitle: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', letterSpacing: 0.21, marginBottom: 14 },
 
   /* Query Card */
   queryCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#FFF', lineHeight: 22, marginBottom: 12 },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#2F2F2F', lineHeight: 22, marginBottom: 12 },
   queryFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   answeredBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  answeredText: { fontSize: 12, fontWeight: '600', color: '#4ECDC4' },
+  answeredText: { fontSize: 12, fontWeight: '600', color: '#2ecc71' },
   pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  pendingText: { fontSize: 12, fontWeight: '600', color: '#FF6B6B' },
+  pendingText: { fontSize: 12, fontWeight: '600', color: '#e67e22' },
   editHint: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  editHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
+  editHintText: { fontSize: 12, fontWeight: '600', color: '#0A3B87' },
   answerHint: {
-    backgroundColor: 'rgba(108,99,255,0.12)',
+    backgroundColor: 'rgba(10,59,135,0.12)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
   },
-  answerHintText: { fontSize: 12, fontWeight: '700', color: '#6C63FF' },
+  answerHintText: { fontSize: 12, fontWeight: '700', color: '#0A3B87' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 18,
     padding: 40,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 14 },
+  emptyText: { fontSize: 13, color: '#888', marginTop: 14 },
 });

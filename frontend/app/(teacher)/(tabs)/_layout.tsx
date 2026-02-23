@@ -45,7 +45,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               <Ionicons
                 name={isFocused ? config.activeIcon : config.icon}
                 size={22}
-                color={isFocused ? '#1A1A2E' : '#FFFFFF'}
+                color={isFocused ? '#000' : '#FFF'}
               />
             </TouchableOpacity>
           );
@@ -73,37 +73,32 @@ const styles = StyleSheet.create({
   navBarContainer: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 28 : 20,
-    left: 28,
-    right: 28,
+    left: 32,
+    right: 32,
   },
   navBar: {
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: 'rgba(26, 26, 46, 0.92)',
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(176, 137, 137, 0.13)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: '#F5F5F5',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
   },
   navItem: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 55,
+    height: 55,
+    borderRadius: 27.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   navItemActive: {
     backgroundColor: '#FFFFFF',
-    shadowColor: '#FFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 4,
   },
 });

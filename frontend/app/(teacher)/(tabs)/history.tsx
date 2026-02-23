@@ -67,16 +67,16 @@ export default function TeacherHistory() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6C63FF" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#444" />}
       >
         <Text style={styles.screenTitle}>History</Text>
         <Text style={styles.screenSub}>{queries.length} answered quer{queries.length === 1 ? 'y' : 'ies'}</Text>
 
         {loading ? (
-          <ActivityIndicator color="#6C63FF" style={{ marginTop: 40 }} />
+          <ActivityIndicator color="#444" style={{ marginTop: 40 }} />
         ) : queries.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="time-outline" size={48} color="#555" />
+            <Ionicons name="time-outline" size={48} color="#888" />
             <Text style={styles.emptyTitle}>No history yet</Text>
             <Text style={styles.emptyText}>Answered queries will appear here</Text>
           </View>
@@ -115,7 +115,7 @@ export default function TeacherHistory() {
 
               {/* Edit hint */}
               <View style={styles.editHintRow}>
-                <Ionicons name="create-outline" size={14} color="#6C63FF" />
+                <Ionicons name="create-outline" size={14} color="#0A3B87" />
                 <Text style={styles.editHintText}>Edit Your Answer</Text>
               </View>
             </TouchableOpacity>
@@ -127,50 +127,51 @@ export default function TeacherHistory() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 110 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
 
-  screenTitle: { fontSize: 28, fontWeight: '800', color: '#FFF' },
-  screenSub: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4, marginBottom: 20 },
+  screenTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
+  screenSub: { fontSize: 13, color: '#888', marginTop: 4, marginBottom: 20 },
 
   /* History Card */
   histCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 18,
     marginBottom: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  histQuestion: { fontSize: 15, fontWeight: '700', color: '#FFF', lineHeight: 22, marginBottom: 8 },
-  histAnswer: { fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 20, marginBottom: 12 },
+  histQuestion: { fontSize: 15, fontWeight: '700', color: '#2F2F2F', lineHeight: 22, marginBottom: 8 },
+  histAnswer: { fontSize: 13, color: '#888', lineHeight: 20, marginBottom: 12 },
   histFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   histCourseBadge: {
-    backgroundColor: 'rgba(108,99,255,0.12)',
+    backgroundColor: '#0A3B87',
     paddingHorizontal: 10,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 10,
   },
-  histCourseBadgeText: { fontSize: 11, fontWeight: '700', color: '#6C63FF' },
-  histDate: { fontSize: 11, color: 'rgba(255,255,255,0.3)' },
+  histCourseBadgeText: { fontSize: 11, fontWeight: '700', color: '#FFF' },
+  histDate: { fontSize: 11, color: '#B7B7B7' },
   editHintRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     alignSelf: 'flex-end',
   },
-  editHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
+  editHintText: { fontSize: 12, fontWeight: '600', color: '#0A3B87' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 18,
     padding: 48,
     alignItems: 'center',
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#FFF', marginTop: 16 },
-  emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#2F2F2F', marginTop: 16 },
+  emptyText: { fontSize: 13, color: '#888', marginTop: 6 },
 });

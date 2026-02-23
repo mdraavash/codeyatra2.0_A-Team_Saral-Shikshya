@@ -66,7 +66,7 @@ export default function CourseStudents() {
               </View>
               <View style={styles.headerStatDivider} />
               <View style={styles.headerStatItem}>
-                <Text style={[styles.headerStatNum, { color: '#FF6B6B' }]}>{pendingCount}</Text>
+                <Text style={[styles.headerStatNum, { color: '#e67e22' }]}>{pendingCount}</Text>
                 <Text style={styles.headerStatLabel}>With Pending</Text>
               </View>
             </View>
@@ -75,10 +75,10 @@ export default function CourseStudents() {
 
         {/* Student List */}
         {loading ? (
-          <ActivityIndicator color="#6C63FF" style={{ marginTop: 40 }} />
+          <ActivityIndicator color="#444" style={{ marginTop: 40 }} />
         ) : students.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="people-outline" size={48} color="#555" />
+            <Ionicons name="people-outline" size={48} color="#888" />
             <Text style={styles.emptyTitle}>No students yet</Text>
             <Text style={styles.emptyText}>Students who ask questions will appear here</Text>
           </View>
@@ -111,7 +111,7 @@ export default function CourseStudents() {
                   <Text style={styles.pendingTagText}>Pending</Text>
                 </View>
               )}
-              <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
+              <Ionicons name="chevron-forward" size={18} color="#B7B7B7" />
             </TouchableOpacity>
           ))
         )}
@@ -121,8 +121,8 @@ export default function CourseStudents() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 60, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
@@ -132,23 +132,28 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   /* Header */
   headerCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#F5F5F5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF' },
-  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
+  headerTitle: { fontSize: 22, fontWeight: '600', color: '#FFF' },
+  headerSub: { fontSize: 13, color: '#FFFFFF', marginTop: 4 },
   headerStats: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,47 +161,48 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   headerStatItem: { alignItems: 'center' },
-  headerStatNum: { fontSize: 20, fontWeight: '800', color: '#6C63FF' },
-  headerStatLabel: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
-  headerStatDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.1)' },
+  headerStatNum: { fontSize: 20, fontWeight: '800', color: '#0A3B87' },
+  headerStatLabel: { fontSize: 11, color: '#FFFFFF', marginTop: 2 },
+  headerStatDivider: { width: 1, height: 30, backgroundColor: '#F5F5F5' },
 
   /* Student Card */
   studentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#16213E',
-    borderRadius: 14,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 16,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statusDot: { width: 10, height: 10, borderRadius: 5, marginRight: 14 },
-  dotPending: { backgroundColor: '#FF6B6B' },
-  dotClear: { backgroundColor: '#4ECDC4' },
+  dotPending: { backgroundColor: '#e67e22' },
+  dotClear: { backgroundColor: '#2ecc71' },
   studentInfo: { flex: 1 },
-  studentRoll: { fontSize: 15, fontWeight: '700', color: '#FFF' },
-  studentName: { fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
+  studentRoll: { fontSize: 15, fontWeight: '700', color: '#2F2F2F' },
+  studentName: { fontSize: 12, color: '#888', marginTop: 2 },
   pendingTag: {
-    backgroundColor: 'rgba(255,107,107,0.12)',
+    backgroundColor: 'rgba(230,126,34,0.12)',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
     marginRight: 8,
   },
-  pendingTagText: { fontSize: 11, fontWeight: '600', color: '#FF6B6B' },
+  pendingTagText: { fontSize: 11, fontWeight: '600', color: '#e67e22' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 18,
     padding: 48,
     alignItems: 'center',
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
   },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#FFF', marginTop: 16 },
-  emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#2F2F2F', marginTop: 16 },
+  emptyText: { fontSize: 13, color: '#888', marginTop: 6 },
 });

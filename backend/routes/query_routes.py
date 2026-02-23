@@ -42,7 +42,25 @@ def _notif_doc(n) -> NotificationResponse:
 async def create_query(body: QueryCreate, current_user=Depends(get_current_user)):
     if current_user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can ask queries")
+    
     db = get_database()
+    student_id = str(current_user["_id"])
+
+    '''today_start = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    
+    query_count = await db["queries"].count_documents({
+        "student_id": student_id,
+        "created_at": {"$gte": today_start}
+    })
+
+    if query_count >= 5:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS, 
+            detail="You have reached your limit of 5 queries for today. Please try again tomorrow."
+        )'''
+
     course = await db["courses"].find_one({"_id": ObjectId(body.course_id)})
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -50,7 +68,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     doc = {
         "course_id": body.course_id,
         "course_name": course["name"],
-        "student_id": str(current_user["_id"]),
+        "student_id": student_id,
         "student_name": current_user["name"],
         "student_roll": current_user.get("roll", ""),
         "question": body.question,
@@ -60,10 +78,10 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
         "answered_at": None,
         "teacher_id": course["teacher_id"],
     }
+    
     result = await db["queries"].insert_one(doc)
     doc["_id"] = result.inserted_id
 
-    # notify teacher for new query
     await db["notifications"].insert_one({
         "user_id": course["teacher_id"],
         "message": f"A student raised a question on {course['name']}",
@@ -256,7 +274,6 @@ async def teacher_student_queries(course_id: str, student_id: str, current_user=
     return [_query_doc(q, anonymous=True) for q in queries]
 
 
-# ── Ratings ──
 
 @router.post("/rate", response_model=RatingResponse, status_code=201)
 async def rate_teacher(body: RatingCreate, current_user=Depends(get_current_user)):
@@ -268,7 +285,6 @@ async def rate_teacher(body: RatingCreate, current_user=Depends(get_current_user
     db = get_database()
     student_id = str(current_user["_id"])
 
-    # check query exists and is answered
     q = await db["queries"].find_one({"_id": ObjectId(body.query_id)})
     if not q:
         raise HTTPException(status_code=404, detail="Query not found")
