@@ -36,6 +36,11 @@ export const API = {
   TEACHER_COURSE_STUDENTS: (courseId: string) => `${API_BASE_URL}/queries/teacher/course/${courseId}/students`,
   TEACHER_STUDENT_QUERIES: (courseId: string, studentId: string) => `${API_BASE_URL}/queries/teacher/course/${courseId}/student/${studentId}`,
 
+  // Ratings
+  RATE_TEACHER: `${API_BASE_URL}/queries/rate`,
+  QUERY_RATING: (queryId: string) => `${API_BASE_URL}/queries/${queryId}/rating`,
+  TEACHER_RATING: (teacherId: string) => `${API_BASE_URL}/queries/teacher/${teacherId}/rating`,
+
   // Notifications
   NOTIFICATIONS: `${API_BASE_URL}/queries/notifications`,
   NOTIFICATION_READ: (notifId: string) => `${API_BASE_URL}/queries/notifications/${notifId}/read`,

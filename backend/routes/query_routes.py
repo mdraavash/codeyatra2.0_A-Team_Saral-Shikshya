@@ -3,7 +3,7 @@ from bson import ObjectId
 from datetime import datetime, timezone
 from database import get_database
 from auth import get_current_user
-from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse
+from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, RatingCreate, RatingResponse, TeacherRatingResponse
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
@@ -21,6 +21,7 @@ def _query_doc(q) -> QueryResponse:
         answered=q.get("answered", False),
         created_at=q["created_at"].isoformat() if isinstance(q["created_at"], datetime) else q["created_at"],
         answered_at=q["answered_at"].isoformat() if q.get("answered_at") and isinstance(q["answered_at"], datetime) else q.get("answered_at"),
+        teacher_id=q.get("teacher_id", ""),
     )
 
 
@@ -251,3 +252,99 @@ async def teacher_student_queries(course_id: str, student_id: str, current_user=
         {"course_id": course_id, "student_id": student_id, "teacher_id": str(current_user["_id"])}
     ).sort("created_at", -1).to_list(100)
     return [_query_doc(q) for q in queries]
+
+
+# ── Ratings ──
+
+@router.post("/rate", response_model=RatingResponse, status_code=201)
+async def rate_teacher(body: RatingCreate, current_user=Depends(get_current_user)):
+    if current_user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can rate")
+    if not 1 <= body.rating <= 5:
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    db = get_database()
+    student_id = str(current_user["_id"])
+
+    # check query exists and is answered
+    q = await db["queries"].find_one({"_id": ObjectId(body.query_id)})
+    if not q:
+        raise HTTPException(status_code=404, detail="Query not found")
+    if not q.get("answered"):
+        raise HTTPException(status_code=400, detail="Cannot rate an unanswered query")
+
+    # check if already rated
+    existing = await db["ratings"].find_one({"query_id": body.query_id, "student_id": student_id})
+    if existing:
+        # update existing rating
+        await db["ratings"].update_one(
+            {"_id": existing["_id"]},
+            {"$set": {"rating": body.rating}},
+        )
+        existing["rating"] = body.rating
+        return RatingResponse(
+            id=str(existing["_id"]),
+            query_id=existing["query_id"],
+            student_id=existing["student_id"],
+            teacher_id=existing["teacher_id"],
+            rating=body.rating,
+            created_at=existing["created_at"].isoformat() if isinstance(existing["created_at"], datetime) else existing["created_at"],
+        )
+
+    doc = {
+        "query_id": body.query_id,
+        "student_id": student_id,
+        "teacher_id": body.teacher_id,
+        "rating": body.rating,
+        "created_at": datetime.now(timezone.utc),
+    }
+    result = await db["ratings"].insert_one(doc)
+    doc["_id"] = result.inserted_id
+
+    # update teacher's average rating
+    pipeline = [
+        {"$match": {"teacher_id": body.teacher_id}},
+        {"$group": {"_id": "$teacher_id", "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
+    ]
+    agg = await db["ratings"].aggregate(pipeline).to_list(1)
+    if agg:
+        avg_rating = round(agg[0]["avg"], 2)
+        total = agg[0]["count"]
+        await db["users"].update_one(
+            {"_id": ObjectId(body.teacher_id)},
+            {"$set": {"average_rating": avg_rating, "total_ratings": total}},
+        )
+
+    return RatingResponse(
+        id=str(doc["_id"]),
+        query_id=doc["query_id"],
+        student_id=doc["student_id"],
+        teacher_id=doc["teacher_id"],
+        rating=doc["rating"],
+        created_at=doc["created_at"].isoformat(),
+    )
+
+
+# get current student's rating for a specific query
+@router.get("/{query_id}/rating")
+async def get_query_rating(query_id: str, current_user=Depends(get_current_user)):
+    db = get_database()
+    student_id = str(current_user["_id"])
+    existing = await db["ratings"].find_one({"query_id": query_id, "student_id": student_id})
+    if existing:
+        return {"rating": existing["rating"]}
+    return {"rating": None}
+
+
+# get teacher's average rating
+@router.get("/teacher/{teacher_id}/rating", response_model=TeacherRatingResponse)
+async def get_teacher_rating(teacher_id: str, current_user=Depends(get_current_user)):
+    db = get_database()
+    teacher = await db["users"].find_one({"_id": ObjectId(teacher_id), "role": "teacher"})
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    return TeacherRatingResponse(
+        teacher_id=teacher_id,
+        average_rating=teacher.get("average_rating", 0.0),
+        total_ratings=teacher.get("total_ratings", 0),
+    )

@@ -10,10 +10,14 @@ export default function StudentLayout() {
         animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen name="course-detail" />
       <Stack.Screen name="queries-answered" />
       <Stack.Screen name="ask-question" />
+      <Stack.Screen
+        name="answer-detail"
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+      />
     </Stack>
   );
 }

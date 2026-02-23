@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
@@ -42,7 +43,7 @@ export default function AskQuestion() {
       });
       if (res.ok) {
         Alert.alert('Success', 'Your query has been sent to the teacher!', [
-          { text: 'OK', onPress: () => router.replace('/(student)/' as never) },
+          { text: 'OK', onPress: () => router.back() },
         ]);
         return;
       } else {
@@ -58,159 +59,135 @@ export default function AskQuestion() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header Bar */}
+      <View style={styles.headerBar}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+        <View style={styles.headerTitleWrap}>
+          <Text style={styles.headerTitle}>Ask a Question</Text>
+          <Text style={styles.headerSubtitle} numberOfLines={1}>{courseName}</Text>
+        </View>
+        <View style={{ width: 40 }} />
+      </View>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Intro Card */}
-        <View style={styles.introCard}>
-          <Text style={styles.introTitle}>Ask Your Question</Text>
-          <Text style={styles.introSub}>
-            {courseName} {teacherName}
-          </Text>
-        </View>
+        <View style={styles.body}>
+          {/* Course Info */}
+          <View style={styles.courseInfoRow}>
+            <Ionicons name="book-outline" size={18} color="#6C63FF" />
+            <Text style={styles.courseInfoText}>{courseName}</Text>
+            <Text style={styles.teacherInfoText}>by {teacherName}</Text>
+          </View>
 
-        {/* Spacer */}
-        <View style={{ flex: 1 }} />
+          {/* Text Input */}
+          <View style={styles.inputCard}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type your question here..."
+              placeholderTextColor="#555"
+              value={question}
+              onChangeText={setQuestion}
+              multiline
+              textAlignVertical="top"
+            />
+          </View>
 
-        {/* Input */}
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder="Write Your Query ....."
-            placeholderTextColor="#BDBDBD"
-            value={question}
-            onChangeText={setQuestion}
-            multiline
-          />
+          {/* Spacer */}
+          <View style={{ flex: 1 }} />
+
+          {/* Submit Button */}
           <TouchableOpacity
-            style={styles.sendBtn}
+            style={[styles.submitBtn, (!question.trim() || submitting) && styles.submitBtnDisabled]}
             onPress={handleSubmit}
             disabled={submitting || !question.trim()}
             activeOpacity={0.7}
           >
-            <Text style={styles.sendArrow}>{'>'}</Text>
+            {submitting ? (
+              <ActivityIndicator color="#FFF" size="small" />
+            ) : (
+              <>
+                <Ionicons name="send" size={20} color="#FFF" />
+                <Text style={styles.submitBtnText}>Submit Query</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-
-      {/* Back */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color="#FFF" />
-      </TouchableOpacity>
-
-      {/* Bottom Nav Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/(student)/' as never)}>
-          <Ionicons name="home-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Ionicons name="chatbox-outline" size={22} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="time-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="notifications-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2F2F2F', paddingHorizontal: 17 },
+  container: { flex: 1, backgroundColor: '#1A1A2E' },
 
-  introCard: {
-    width: '100%',
-    height: 120,
-    backgroundColor: '#444444',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  introTitle: { fontSize: 22, fontWeight: '600', color: '#FFFFFF', lineHeight: 33, textAlign: 'center' },
-  introSub: { fontSize: 15, color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.225, marginTop: 2 },
-
-  inputRow: {
+  headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#6F6F6F',
-    borderRadius: 10,
-    height: 54,
-    paddingHorizontal: 14,
-    marginBottom: 110,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitleWrap: { flex: 1, alignItems: 'center' },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
+  headerSubtitle: { fontSize: 12, color: '#6C63FF', marginTop: 2 },
+
+  body: { flex: 1, paddingHorizontal: 20, paddingTop: 20, paddingBottom: 30 },
+
+  courseInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(108, 99, 255, 0.08)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(108, 99, 255, 0.15)',
+  },
+  courseInfoText: { fontSize: 14, fontWeight: '600', color: '#6C63FF' },
+  teacherInfoText: { fontSize: 13, color: '#888' },
+
+  inputCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 18,
+    padding: 4,
+    minHeight: 200,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   input: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     color: '#FFFFFF',
-    letterSpacing: 0.21,
-  },
-  sendBtn: {
-    width: 35,
-    height: 35,
-    borderRadius: 17.5,
-    backgroundColor: '#444444',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sendArrow: { fontSize: 20, color: '#FFFFFF', marginTop: -2 },
-
-  backBtn: {
-    position: 'absolute',
-    top: 60,
-    left: 17,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 16,
+    lineHeight: 24,
+    minHeight: 192,
   },
 
-  /* Bottom Nav */
-  navBar: {
-    position: 'absolute',
-    bottom: 24,
-    left: 32,
-    right: 32,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(176, 137, 137, 0.13)',
-    borderWidth: 1,
-    borderColor: '#F5F5F5',
+  submitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  navItem: {
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
     justifyContent: 'center',
-    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#6C63FF',
+    height: 56,
+    borderRadius: 28,
+    marginTop: 16,
   },
-  navItemActive: { backgroundColor: '#FFFFFF' },
+  submitBtnDisabled: { opacity: 0.4 },
+  submitBtnText: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
 });

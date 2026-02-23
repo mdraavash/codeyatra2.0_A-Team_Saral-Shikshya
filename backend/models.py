@@ -3,7 +3,6 @@ from typing import Literal, Optional, List
 from datetime import datetime
 
 
-# ── Auth ──────────────────────────────────────────────
 
 class UserRegister(BaseModel):
     name: str
@@ -29,11 +28,9 @@ class TokenResponse(BaseModel):
     user: UserResponse
 
 
-# ── Courses ───────────────────────────────────────────
-
 class CourseCreate(BaseModel):
     name: str
-    teacher_id: str          # ObjectId of the teacher
+    teacher_id: str          
     teacher_name: str
 
 class CourseResponse(BaseModel):
@@ -42,7 +39,7 @@ class CourseResponse(BaseModel):
     teacher_id: str
     teacher_name: str
 
-# ── Queries ───────────────────────────────────────────
+
 
 class QueryCreate(BaseModel):
     course_id: str
@@ -63,9 +60,9 @@ class QueryResponse(BaseModel):
     answered: bool = False
     created_at: str
     answered_at: Optional[str] = None
+    teacher_id: str = ""
 
 
-# ── Notifications ─────────────────────────────────────
 
 class NotificationResponse(BaseModel):
     id: str
@@ -75,3 +72,23 @@ class NotificationResponse(BaseModel):
     course_id: str
     read: bool = False
     created_at: str
+
+
+# ── Rating ──
+class RatingCreate(BaseModel):
+    query_id: str
+    teacher_id: str
+    rating: int          # 1-5
+
+class RatingResponse(BaseModel):
+    id: str
+    query_id: str
+    student_id: str
+    teacher_id: str
+    rating: int
+    created_at: str
+
+class TeacherRatingResponse(BaseModel):
+    teacher_id: str
+    average_rating: float
+    total_ratings: int

@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { API } from '@/constants/api';
 
 interface Query {
@@ -18,10 +18,11 @@ interface Query {
   question: string;
   answer: string | null;
   answered: boolean;
+  teacher_id?: string;
 }
 
 export default function CourseDetail() {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const router = useRouter();
   const { courseId, courseName, teacherName } = useLocalSearchParams<{
     courseId: string;
@@ -50,219 +51,218 @@ export default function CourseDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header Bar */}
+      <View style={styles.headerBar}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={22} color="#FFF" />
+        </TouchableOpacity>
+        <View style={styles.headerTitleWrap}>
+          <Text style={styles.headerTitle} numberOfLines={1}>{courseName}</Text>
+          <Text style={styles.headerSubtitle} numberOfLines={1}>{teacherName}</Text>
+        </View>
+        <View style={{ width: 40 }} />
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Intro Card */}
-        <View style={styles.introCard}>
-          <Text style={styles.introName}>{user?.name ?? 'Student'}</Text>
-          <Text style={styles.introId}>{user?.roll ?? ''}</Text>
+        {/* Course Info Card */}
+        <View style={styles.courseInfoCard}>
+          <View style={styles.courseInfoIcon}>
+            <MaterialCommunityIcons name="book-open-variant" size={32} color="#6C63FF" />
+          </View>
+          <Text style={styles.courseInfoName}>{courseName}</Text>
+          <Text style={styles.courseInfoTeacher}>Instructor: {teacherName}</Text>
         </View>
 
-        {/* Course Title */}
-        <Text style={styles.sectionTitle}>Courses – {courseName}</Text>
+        {/* Action Cards */}
+        <View style={styles.actionsRow}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            activeOpacity={0.8}
+            onPress={() =>
+              router.push({
+                pathname: '/(student)/ask-question',
+                params: { courseId, courseName, teacherName },
+              })
+            }
+          >
+            <View style={[styles.actionIconWrap, { backgroundColor: 'rgba(108, 99, 255, 0.15)' }]}>
+              <Ionicons name="create-outline" size={24} color="#6C63FF" />
+            </View>
+            <Text style={styles.actionTitle}>Ask Query</Text>
+            <Text style={styles.actionSub}>Submit a new question</Text>
+          </TouchableOpacity>
 
-        {/* Ask your Queries */}
-        <TouchableOpacity
-          style={styles.actionCard}
-          activeOpacity={0.7}
-          onPress={() =>
-            router.push({
-              pathname: '/(student)/ask-question',
-              params: { courseId, courseName, teacherName },
-            })
-          }
-        >
-          <View style={{ flex: 1 }}>
-            <Text style={styles.actionTitle}>Ask your Queries</Text>
-            <Text style={styles.actionSub}>Ask Your Queries to your corresponding teacher</Text>
-          </View>
-          <View style={styles.arrowCircle}>
-            <Text style={styles.arrowText}>{'>'}</Text>
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionCard}
+            activeOpacity={0.8}
+            onPress={() =>
+              router.push({
+                pathname: '/(student)/queries-answered',
+                params: { courseId, courseName, teacherName },
+              })
+            }
+          >
+            <View style={[styles.actionIconWrap, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
+              <Ionicons name="checkmark-done-outline" size={24} color="#4ECDC4" />
+            </View>
+            <Text style={styles.actionTitle}>Answered</Text>
+            <Text style={styles.actionSub}>View teacher replies</Text>
+          </TouchableOpacity>
+        </View>
 
-        {/* Queries Answered */}
-        <TouchableOpacity
-          style={styles.actionCard}
-          activeOpacity={0.7}
-          onPress={() =>
-            router.push({
-              pathname: '/(student)/queries-answered',
-              params: { courseId, courseName, teacherName },
-            })
-          }
-        >
-          <View style={{ flex: 1 }}>
-            <Text style={styles.actionTitle}>Queries Answered</Text>
-            <Text style={styles.actionSub}>Check all your replied queries</Text>
-          </View>
-          <View style={styles.arrowCircle}>
-            <Text style={styles.arrowText}>{'>'}</Text>
-          </View>
-        </TouchableOpacity>
+        {/* FAQ Section */}
+        <View style={styles.sectionHeader}>
+          <Ionicons name="help-circle-outline" size={20} color="#FFD93D" />
+          <Text style={styles.sectionTitle}>Frequently Asked</Text>
+        </View>
 
-        {/* FAQ */}
-        <Text style={styles.sectionTitle}>FAQ</Text>
         {loading ? (
-          <ActivityIndicator color="#FFF" />
+          <ActivityIndicator color="#6C63FF" style={{ marginTop: 20 }} />
         ) : faqs.length === 0 ? (
-          <Text style={styles.emptyText}>No FAQs yet</Text>
+          <View style={styles.emptyCard}>
+            <Ionicons name="chatbubble-ellipses-outline" size={32} color="#555" />
+            <Text style={styles.emptyText}>No FAQs yet</Text>
+          </View>
         ) : (
           faqs.slice(0, 5).map((faq) => (
-            <View key={faq.id} style={styles.faqCard}>
-              <Text style={styles.faqQuestion} numberOfLines={2}>
-                {faq.question}
-              </Text>
-              <Text style={styles.faqAnswer} numberOfLines={1}>
-                {faq.answer ?? ''}
-              </Text>
-            </View>
+            <TouchableOpacity
+              key={faq.id}
+              style={styles.faqCard}
+              activeOpacity={0.8}
+              onPress={() => {
+                if (faq.answer) {
+                  router.push({
+                    pathname: '/(student)/answer-detail',
+                    params: {
+                      queryId: faq.id,
+                      question: faq.question,
+                      answer: faq.answer,
+                      courseName: courseName ?? '',
+                      teacherId: faq.teacher_id ?? '',
+                    },
+                  });
+                }
+              }}
+            >
+              <Text style={styles.faqQuestion} numberOfLines={2}>{faq.question}</Text>
+              <Text style={styles.faqAnswer} numberOfLines={2}>{faq.answer ?? ''}</Text>
+              {faq.answer && (
+                <View style={styles.faqTapHint}>
+                  <Text style={styles.faqTapHintText}>Tap to view & rate</Text>
+                  <Ionicons name="chevron-forward" size={14} color="#6C63FF" />
+                </View>
+              )}
+            </TouchableOpacity>
           ))
         )}
       </ScrollView>
-
-      {/* Back button */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color="#FFF" />
-      </TouchableOpacity>
-
-      {/* Bottom Nav Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.replace('/(student)/' as never)}>
-          <Ionicons name="home-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Ionicons name="chatbox-outline" size={22} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="time-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="notifications-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2F2F2F' },
-  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
+  container: { flex: 1, backgroundColor: '#1A1A2E' },
 
-  introCard: {
-    width: '100%',
-    height: 120,
-    backgroundColor: '#444444',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  introName: { fontSize: 22, fontWeight: '600', textAlign: 'center', color: '#FFFFFF', lineHeight: 33 },
-  introId: { fontSize: 12, textAlign: 'center', color: '#FFFFFF', marginTop: 2, letterSpacing: 0.18 },
-
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.21,
-    marginTop: 24,
-    marginBottom: 14,
-  },
-  emptyText: { fontSize: 13, color: '#888', marginBottom: 8 },
-
-  /* Action Card (Ask Queries / Queries Answered) */
-  actionCard: {
-    width: '100%',
-    height: 76,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+  headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 17,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.06)',
   },
-  actionTitle: { fontSize: 15, fontWeight: '600', color: '#000000', letterSpacing: 0.225 },
-  actionSub: { fontSize: 11, color: '#A7A7A7', letterSpacing: 0.165, marginTop: 4 },
-  arrowCircle: {
-    width: 35,
-    height: 35,
-    borderRadius: 17.5,
-    backgroundColor: '#444444',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  arrowText: { fontSize: 20, color: '#FFFFFF', marginTop: -2 },
-
-  /* FAQ Card */
-  faqCard: {
-    width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  faqQuestion: { fontSize: 14, fontWeight: '600', color: '#000000', letterSpacing: 0.21 },
-  faqAnswer: { fontSize: 14, color: '#B7B7B7', letterSpacing: 0.21, marginTop: 6 },
-
   backBtn: {
-    position: 'absolute',
-    top: 60,
-    left: 17,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  headerTitleWrap: { flex: 1, alignItems: 'center' },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
+  headerSubtitle: { fontSize: 12, color: '#6C63FF', marginTop: 2 },
 
-  /* Bottom Nav */
-  navBar: {
-    position: 'absolute',
-    bottom: 24,
-    left: 32,
-    right: 32,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(176, 137, 137, 0.13)',
+  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+
+  courseInfoCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 20,
+    padding: 28,
+    alignItems: 'center',
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#F5F5F5',
+    borderColor: 'rgba(255,255,255,0.04)',
+  },
+  courseInfoIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: 'rgba(108, 99, 255, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  courseInfoName: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
+  courseInfoTeacher: { fontSize: 14, color: '#888', marginTop: 6 },
+
+  actionsRow: { flexDirection: 'row', gap: 14, marginBottom: 28 },
+  actionCard: {
+    flex: 1,
+    backgroundColor: '#16213E',
+    borderRadius: 18,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
+  },
+  actionIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  actionTitle: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', marginBottom: 4 },
+  actionSub: { fontSize: 12, color: '#888' },
+
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    gap: 8,
+    marginBottom: 16,
   },
-  navItem: {
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
-    justifyContent: 'center',
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
+
+  emptyCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 16,
+    paddingVertical: 30,
     alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
   },
-  navItemActive: { backgroundColor: '#FFFFFF' },
+  emptyText: { fontSize: 14, color: '#666' },
+
+  faqCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.04)',
+    borderLeftWidth: 3,
+    borderLeftColor: '#6C63FF',
+  },
+  faqQuestion: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', lineHeight: 20 },
+  faqAnswer: { fontSize: 13, color: '#888', lineHeight: 20, marginTop: 8 },
+  faqTapHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 10,
+    alignSelf: 'flex-end',
+  },
+  faqTapHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
 });

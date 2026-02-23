@@ -23,6 +23,8 @@ interface Teacher {
   name: string;
   email: string;
   roll: string;
+  average_rating?: number;
+  total_ratings?: number;
 }
 
 interface Subject {
@@ -204,6 +206,21 @@ export default function AdminDashboard() {
               <Text style={styles.listName}>{t.name}</Text>
               <Text style={styles.listSub}>{t.email}</Text>
               {t.roll ? <Text style={styles.listSub}>{t.roll}</Text> : null}
+              <View style={styles.ratingRow}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Ionicons
+                    key={star}
+                    name={star <= Math.round(t.average_rating ?? 0) ? 'star' : 'star-outline'}
+                    size={14}
+                    color={star <= Math.round(t.average_rating ?? 0) ? '#FFD93D' : '#CCC'}
+                  />
+                ))}
+                <Text style={styles.ratingLabel}>
+                  {(t.average_rating ?? 0) > 0
+                    ? `${(t.average_rating ?? 0).toFixed(1)} (${t.total_ratings ?? 0})`
+                    : 'No ratings'}
+                </Text>
+              </View>
             </View>
             <TouchableOpacity onPress={() => handleDeleteTeacher(t)} style={styles.deleteBtn}>
               <Ionicons name="trash-outline" size={20} color="#FF4444" />
@@ -440,6 +457,8 @@ const styles = StyleSheet.create({
   },
   listName: { fontSize: 15, fontWeight: '600', color: '#2F2F2F' },
   listSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 6 },
+  ratingLabel: { fontSize: 11, color: '#888', marginLeft: 4 },
   deleteBtn: {
     width: 40,
     height: 40,

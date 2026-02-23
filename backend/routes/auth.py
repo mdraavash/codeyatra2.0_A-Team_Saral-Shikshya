@@ -4,7 +4,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from database import get_database
 from config import SECRET_KEY, ALGORITHM
-
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 # Bearer token scheme

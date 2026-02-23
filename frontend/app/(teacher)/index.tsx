@@ -37,6 +37,8 @@ export default function TeacherHome() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [avgRating, setAvgRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -48,6 +50,17 @@ export default function TeacherHome() {
       ]);
       if (coursesRes.ok) setSubjects(await coursesRes.json());
       if (notifsRes.ok) setNotifications(await notifsRes.json());
+      // Fetch teacher rating
+      if (user?.id) {
+        try {
+          const ratingRes = await fetch(API.TEACHER_RATING(user.id), { headers });
+          if (ratingRes.ok) {
+            const rData = await ratingRes.json();
+            setAvgRating(rData.average_rating || 0);
+            setTotalRatings(rData.total_ratings || 0);
+          }
+        } catch { /* silent */ }
+      }
     } catch {
       // silent
     } finally {
@@ -84,6 +97,26 @@ export default function TeacherHome() {
         <View style={styles.introCard}>
           <Text style={styles.userName}>{user?.name ?? 'Teacher'}</Text>
           <Text style={styles.userId}>{user?.roll ?? ''}</Text>
+        </View>
+
+        {/* Rating Card */}
+        <View style={styles.ratingCard}>
+          <View style={styles.ratingStars}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Ionicons
+                key={star}
+                name={star <= Math.round(avgRating) ? 'star' : star - 0.5 <= avgRating ? 'star-half' : 'star-outline'}
+                size={22}
+                color={star <= Math.round(avgRating) ? '#FFD93D' : '#888'}
+              />
+            ))}
+          </View>
+          <Text style={styles.ratingText}>
+            {avgRating > 0 ? `${avgRating.toFixed(1)} / 5.0` : 'No ratings yet'}
+          </Text>
+          <Text style={styles.ratingCount}>
+            {totalRatings > 0 ? `Based on ${totalRatings} student rating${totalRatings > 1 ? 's' : ''}` : 'Students will rate your answers'}
+          </Text>
         </View>
 
         {/* Notifications preview */}
@@ -187,6 +220,20 @@ const styles = StyleSheet.create({
   },
   userName: { fontSize: 22, fontWeight: '600', textAlign: 'center', color: '#FFFFFF', lineHeight: 33 },
   userId: { fontSize: 12, textAlign: 'center', color: '#FFFFFF', marginTop: 2, letterSpacing: 0.18 },
+
+  /* Rating Card */
+  ratingCard: {
+    backgroundColor: '#3A3A3A',
+    borderRadius: 16,
+    padding: 18,
+    alignItems: 'center',
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 217, 61, 0.15)',
+  },
+  ratingStars: { flexDirection: 'row', gap: 4, marginBottom: 8 },
+  ratingText: { fontSize: 18, fontWeight: '700', color: '#FFD93D' },
+  ratingCount: { fontSize: 12, color: '#AAA', marginTop: 4 },
 
   /* Section Title */
   sectionTitle: {

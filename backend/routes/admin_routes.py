@@ -13,19 +13,21 @@ def _require_admin(current_user):
 
 
 #teacher
-@router.get("/teachers", response_model=list[UserResponse])
+@router.get("/teachers", response_model=list[dict])
 async def list_teachers(current_user=Depends(get_current_user)):
     _require_admin(current_user)
     db = get_database()
     teachers = await db["users"].find({"role": "teacher"}).to_list(200)
     return [
-        UserResponse(
-            id=str(t["_id"]),
-            name=t["name"],
-            email=t["email"],
-            roll=t.get("roll", ""),
-            role=t["role"],
-        )
+        {
+            "id": str(t["_id"]),
+            "name": t["name"],
+            "email": t["email"],
+            "roll": t.get("roll", ""),
+            "role": t["role"],
+            "average_rating": t.get("average_rating", 0.0),
+            "total_ratings": t.get("total_ratings", 0),
+        }
         for t in teachers
     ]
 
