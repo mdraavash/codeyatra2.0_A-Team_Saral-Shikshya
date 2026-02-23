@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from bson import ObjectId
+from datetime import datetime
 from database import get_database
 from auth import get_current_user
 from models import UserRegister, UserResponse, CourseCreate, CourseResponse
@@ -12,7 +13,7 @@ def _require_admin(current_user):
         raise HTTPException(status_code=403, detail="Admin only")
 
 
-#teacher
+#teacher list
 @router.get("/teachers", response_model=list[dict])
 async def list_teachers(current_user=Depends(get_current_user)):
     _require_admin(current_user)
@@ -43,7 +44,7 @@ async def create_teacher(body: UserRegister, current_user=Depends(get_current_us
         raise HTTPException(status_code=400, detail="Email already registered")
 
     doc = body.model_dump()
-    doc["role"] = "teacher"  # force teacher role
+    doc["role"] = "teacher"
     result = await db["users"].insert_one(doc)
 
     return UserResponse(
@@ -120,3 +121,80 @@ async def delete_teacher(teacher_id: str, current_user=Depends(get_current_user)
     # Also remove subjects assigned to this teacher
     await db["courses"].delete_many({"teacher_id": teacher_id})
     return {"message": "Teacher and assigned subjects deleted"}
+
+
+# list of students
+@router.get("/students", response_model=list[dict])
+async def list_students(current_user=Depends(get_current_user)):
+    _require_admin(current_user)
+    db = get_database()
+    students = await db["users"].find({"role": "student"}).to_list(500)
+    return [
+        {
+            "id": str(s["_id"]),
+            "name": s["name"],
+            "email": s["email"],
+            "roll": s.get("roll", ""),
+            "role": s["role"],
+        }
+        for s in students
+    ]
+
+
+@router.post("/students", response_model=UserResponse, status_code=201)
+async def create_student(body: UserRegister, current_user=Depends(get_current_user)):
+    _require_admin(current_user)
+    db = get_database()
+
+    existing = await db["users"].find_one({"email": body.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    doc = body.model_dump()
+    doc["role"] = "student"
+    result = await db["users"].insert_one(doc)
+
+    return UserResponse(
+        id=str(result.inserted_id),
+        name=doc["name"],
+        email=doc["email"],
+        roll=doc.get("roll", ""),
+        role="student",
+    )
+
+
+@router.delete("/students/{student_id}")
+async def delete_student(student_id: str, current_user=Depends(get_current_user)):
+    _require_admin(current_user)
+    db = get_database()
+    result = await db["users"].delete_one({"_id": ObjectId(student_id), "role": "student"})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Student not found")
+    # Also remove student queries
+    await db["queries"].delete_many({"student_id": student_id})
+    return {"message": "Student and their queries deleted"}
+
+
+# ── All Queries (with real names) ──
+
+@router.get("/queries", response_model=list[dict])
+async def list_all_queries(current_user=Depends(get_current_user)):
+    _require_admin(current_user)
+    db = get_database()
+    queries = await db["queries"].find().sort("created_at", -1).to_list(500)
+    return [
+        {
+            "id": str(q["_id"]),
+            "course_id": q["course_id"],
+            "course_name": q.get("course_name", ""),
+            "student_id": q["student_id"],
+            "student_name": q.get("student_name", ""),
+            "student_roll": q.get("student_roll", ""),
+            "question": q["question"],
+            "answer": q.get("answer"),
+            "answered": q.get("answered", False),
+            "created_at": q["created_at"].isoformat() if isinstance(q["created_at"], datetime) else str(q["created_at"]),
+            "answered_at": q["answered_at"].isoformat() if q.get("answered_at") and isinstance(q["answered_at"], datetime) else q.get("answered_at"),
+        }
+        for q in queries
+    ]

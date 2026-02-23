@@ -7,7 +7,6 @@ from config import SECRET_KEY, ALGORITHM
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
-# Bearer token scheme
 security = HTTPBearer()
 
 

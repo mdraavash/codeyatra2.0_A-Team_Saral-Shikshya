@@ -1,5 +1,4 @@
 import {
-  View,
   Text,
   TextInput,
   Pressable,
@@ -9,6 +8,9 @@ import {
   Image,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect, useRef } from 'react';
@@ -82,6 +84,16 @@ export default function LoginPage() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
 {/*       
       Animated Logo
       <Animated.Image
@@ -93,7 +105,6 @@ export default function LoginPage() {
         resizeMode="contain"
       /> */}
 
-      {/* Animated Form */}
       <Animated.View
         style={[
           styles.inner,
@@ -133,13 +144,15 @@ export default function LoginPage() {
 
         <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <Text style={styles.buttonText}>Logging in...</Text>
           ) : (
             <Text style={styles.buttonText}>Login</Text>
           )}
         </Pressable>
       </Animated.View>
 
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -148,6 +161,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#2F2F2F',
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
   },

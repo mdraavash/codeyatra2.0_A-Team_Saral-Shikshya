@@ -67,7 +67,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # --- AI moderation check ---
+    # AI moderation check
     moderation = moderate_text(body.question)
     if moderation["blocked"] and moderation["confidence"] > 0.8:
         return JSONResponse(

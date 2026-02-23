@@ -45,7 +45,7 @@ export default function QueriesAnswered() {
       }
     };
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+ 
   }, [courseId, token]);
 
   const displayName = courseName || (queries[0]?.course_name ?? '');
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#2F2F2F', lineHeight: 22 },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#f2f2f2', lineHeight: 22 },
   queryAnswer: { fontSize: 14, color: '#888', lineHeight: 20, marginTop: 10 },
   tapHint: {
     flexDirection: 'row',

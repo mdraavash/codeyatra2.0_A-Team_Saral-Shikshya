@@ -8,7 +8,6 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/auth-context';
@@ -16,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { API } from '@/constants/api';
 import { useFocusEffect } from '@react-navigation/native';
 
-type Tab = 'teachers' | 'subjects';
+type Tab = 'teachers' | 'subjects' | 'students' | 'queries';
 
 interface Teacher {
   id: string;
@@ -32,6 +31,27 @@ interface Subject {
   name: string;
   teacher_id: string;
   teacher_name: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  roll: string;
+}
+
+interface Query {
+  id: string;
+  course_id: string;
+  course_name: string;
+  student_id: string;
+  student_name: string;
+  student_roll: string;
+  question: string;
+  answer: string | null;
+  answered: boolean;
+  created_at: string;
+  answered_at: string | null;
 }
 
 export default function AdminDashboard() {
@@ -53,17 +73,34 @@ export default function AdminDashboard() {
   const [sLoading, setSLoading] = useState(false);
   const [showTeacherPicker, setShowTeacherPicker] = useState(false);
 
+  // Students state
+  const [students, setStudents] = useState<Student[]>([]);
+  const [stName, setStName] = useState('');
+  const [stEmail, setStEmail] = useState('');
+  const [stPassword, setStPassword] = useState('');
+  const [stRoll, setStRoll] = useState('');
+  const [stLoading, setStLoading] = useState(false);
+
+  // Queries state
+  const [queries, setQueries] = useState<Query[]>([]);
+  const [queryFilter, setQueryFilter] = useState<'all' | 'pending' | 'answered'>('all');
+  const [expandedQuery, setExpandedQuery] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(true);
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchAll = async () => {
     try {
-      const [tRes, sRes] = await Promise.all([
+      const [tRes, sRes, stuRes, qRes] = await Promise.all([
         fetch(API.ADMIN_TEACHERS, { headers }),
         fetch(API.ADMIN_SUBJECTS, { headers }),
+        fetch(API.ADMIN_STUDENTS, { headers }),
+        fetch(API.ADMIN_QUERIES, { headers }),
       ]);
       if (tRes.ok) setTeachers(await tRes.json());
       if (sRes.ok) setSubjects(await sRes.json());
+      if (stuRes.ok) setStudents(await stuRes.json());
+      if (qRes.ok) setQueries(await qRes.json());
     } catch {
       // silent
     } finally {
@@ -71,10 +108,8 @@ export default function AdminDashboard() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { fetchAll(); }, [token]));
 
-  /* ── Create Teacher ── */
   const handleCreateTeacher = async () => {
     if (!tName.trim() || !tEmail.trim() || !tPassword.trim()) {
       Alert.alert('Error', 'Name, email and password are required');
@@ -153,7 +188,6 @@ export default function AdminDashboard() {
     }
   };
 
-  /* ── Delete Subject ── */
   const handleDeleteSubject = (s: Subject) => {
     Alert.alert('Delete Subject', `Remove "${s.name}"?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -161,6 +195,54 @@ export default function AdminDashboard() {
         text: 'Delete', style: 'destructive', onPress: async () => {
           try {
             await fetch(API.ADMIN_DELETE_SUBJECT(s.id), { method: 'DELETE', headers });
+            fetchAll();
+          } catch { /* silent */ }
+        },
+      },
+    ]);
+  };
+
+ 
+  const handleCreateStudent = async () => {
+    if (!stName.trim() || !stEmail.trim() || !stPassword.trim()) {
+      Alert.alert('Error', 'Name, email and password are required');
+      return;
+    }
+    setStLoading(true);
+    try {
+      const res = await fetch(API.ADMIN_STUDENTS, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          name: stName.trim(),
+          email: stEmail.trim(),
+          password: stPassword.trim(),
+          roll: stRoll.trim(),
+          role: 'student',
+        }),
+      });
+      if (res.ok) {
+        Alert.alert('Success', 'Student created!');
+        setStName(''); setStEmail(''); setStPassword(''); setStRoll('');
+        fetchAll();
+      } else {
+        const d = await res.json();
+        Alert.alert('Error', d.detail || 'Failed');
+      }
+    } catch {
+      Alert.alert('Error', 'Network error');
+    } finally {
+      setStLoading(false);
+    }
+  };
+
+  const handleDeleteStudent = (s: Student) => {
+    Alert.alert('Delete Student', `Remove "${s.name}" and all their queries?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive', onPress: async () => {
+          try {
+            await fetch(API.ADMIN_DELETE_STUDENT(s.id), { method: 'DELETE', headers });
             fetchAll();
           } catch { /* silent */ }
         },
@@ -178,7 +260,6 @@ export default function AdminDashboard() {
     );
   }
 
-  /* ── Teachers Tab ── */
   const renderTeachers = () => (
     <>
       {/* Create form */}
@@ -193,7 +274,7 @@ export default function AdminDashboard() {
         </TouchableOpacity>
       </View>
 
-      {/* List */}
+    
       <Text style={styles.formLabel}>All Teachers ({teachers.length})</Text>
       {teachers.length === 0 ? (
         <Text style={styles.emptyText}>No teachers yet</Text>
@@ -229,7 +310,6 @@ export default function AdminDashboard() {
     </>
   );
 
-  /* ── Subjects Tab ── */
   const renderSubjects = () => (
     <>
       {/* Create form */}
@@ -293,6 +373,115 @@ export default function AdminDashboard() {
     </>
   );
 
+  const renderStudents = () => (
+    <>
+      <Text style={styles.formLabel}>Create New Student</Text>
+      <View style={styles.formCard}>
+        <TextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#999" value={stName} onChangeText={setStName} />
+        <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#999" value={stEmail} onChangeText={setStEmail} keyboardType="email-address" autoCapitalize="none" />
+        <TextInput style={styles.input} placeholder="Password" placeholderTextColor="#999" value={stPassword} onChangeText={setStPassword} secureTextEntry />
+        <TextInput style={styles.input} placeholder="Roll Number" placeholderTextColor="#999" value={stRoll} onChangeText={setStRoll} />
+        <TouchableOpacity style={styles.createBtn} onPress={handleCreateStudent} disabled={stLoading} activeOpacity={0.7}>
+          <Text style={styles.createBtnText}>{stLoading ? 'Creating...' : 'Create Student'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.formLabel}>All Students ({students.length})</Text>
+      {students.length === 0 ? (
+        <Text style={styles.emptyText}>No students yet</Text>
+      ) : (
+        students.map(s => (
+          <View key={s.id} style={styles.listCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.listName}>{s.name}</Text>
+              <Text style={styles.listSub}>{s.email}</Text>
+              {s.roll ? <Text style={styles.listSub}>Roll: {s.roll}</Text> : null}
+            </View>
+            <TouchableOpacity onPress={() => handleDeleteStudent(s)} style={styles.deleteBtn}>
+              <Ionicons name="trash-outline" size={20} color="#FF4444" />
+            </TouchableOpacity>
+          </View>
+        ))
+      )}
+    </>
+  );
+
+  const filteredQueries = queries.filter(q => {
+    if (queryFilter === 'pending') return !q.answered;
+    if (queryFilter === 'answered') return q.answered;
+    return true;
+  });
+
+  const renderQueries = () => (
+    <>
+      {/* Filter chips */}
+      <View style={styles.filterRow}>
+        {(['all', 'pending', 'answered'] as const).map(f => (
+          <TouchableOpacity
+            key={f}
+            style={[styles.filterChip, queryFilter === f && styles.filterChipActive]}
+            onPress={() => setQueryFilter(f)}
+          >
+            <Text style={[styles.filterChipText, queryFilter === f && styles.filterChipTextActive]}>
+              {f === 'all' ? `All (${queries.length})` : f === 'pending' ? `Pending (${queries.filter(q => !q.answered).length})` : `Answered (${queries.filter(q => q.answered).length})`}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {filteredQueries.length === 0 ? (
+        <Text style={styles.emptyText}>No queries found</Text>
+      ) : (
+        filteredQueries.map(q => (
+          <TouchableOpacity
+            key={q.id}
+            style={styles.queryCard}
+            activeOpacity={0.7}
+            onPress={() => setExpandedQuery(expandedQuery === q.id ? null : q.id)}
+          >
+            {/* Header row */}
+            <View style={styles.queryHeader}>
+              <View style={[styles.queryStatusDot, { backgroundColor: q.answered ? '#2ecc71' : '#e67e22' }]} />
+              <Text style={styles.queryCourseBadge}>{q.course_name}</Text>
+              <Text style={styles.queryDate}>{new Date(q.created_at).toLocaleDateString()}</Text>
+            </View>
+
+            {/* Student info – real name visible to admin */}
+            <View style={styles.queryStudentRow}>
+              <Ionicons name="person-outline" size={14} color="#0A3B87" />
+              <Text style={styles.queryStudentName}>{q.student_name}</Text>
+              {q.student_roll ? <Text style={styles.queryStudentRoll}>({q.student_roll})</Text> : null}
+            </View>
+
+            {/* Question */}
+            <Text style={styles.queryQuestion} numberOfLines={expandedQuery === q.id ? undefined : 2}>{q.question}</Text>
+
+            {/* Expanded answer */}
+            {expandedQuery === q.id && q.answered && q.answer && (
+              <View style={styles.queryAnswerBox}>
+                <Text style={styles.queryAnswerLabel}>Answer:</Text>
+                <Text style={styles.queryAnswerText}>{q.answer}</Text>
+              </View>
+            )}
+
+            {!q.answered && (
+              <Text style={styles.queryPendingHint}>Waiting for teacher response...</Text>
+            )}
+          </TouchableOpacity>
+        ))
+      )}
+    </>
+  );
+
+  const renderTab = () => {
+    switch (tab) {
+      case 'teachers': return renderTeachers();
+      case 'subjects': return renderSubjects();
+      case 'students': return renderStudents();
+      case 'queries': return renderQueries();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -304,27 +493,24 @@ export default function AdminDashboard() {
 
         {/* Tab Switcher */}
         <View style={styles.tabRow}>
-          <TouchableOpacity
-            style={[styles.tabBtn, tab === 'teachers' && styles.tabBtnActive]}
-            onPress={() => setTab('teachers')}
-          >
-            <Ionicons name="people-outline" size={18} color={tab === 'teachers' ? '#2F2F2F' : '#AAA'} style={{ marginRight: 6 }} />
-            <Text style={[styles.tabText, tab === 'teachers' && styles.tabTextActive]}>
-              Teachers
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tabBtn, tab === 'subjects' && styles.tabBtnActive]}
-            onPress={() => setTab('subjects')}
-          >
-            <Ionicons name="book-outline" size={18} color={tab === 'subjects' ? '#2F2F2F' : '#AAA'} style={{ marginRight: 6 }} />
-            <Text style={[styles.tabText, tab === 'subjects' && styles.tabTextActive]}>
-              Subjects
-            </Text>
-          </TouchableOpacity>
+          {([
+            { key: 'teachers', icon: 'people-outline', label: 'Teachers' },
+            { key: 'students', icon: 'school-outline', label: 'Students' },
+            { key: 'subjects', icon: 'book-outline', label: 'Subjects' },
+            { key: 'queries', icon: 'chatbubbles-outline', label: 'Queries' },
+          ] as const).map(t => (
+            <TouchableOpacity
+              key={t.key}
+              style={[styles.tabBtn, tab === t.key && styles.tabBtnActive]}
+              onPress={() => setTab(t.key)}
+            >
+              <Ionicons name={t.icon as any} size={16} color={tab === t.key ? '#2F2F2F' : '#AAA'} />
+              <Text style={[styles.tabText, tab === t.key && styles.tabTextActive]}>{t.label}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {tab === 'teachers' ? renderTeachers() : renderSubjects()}
+        {renderTab()}
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.7} onPress={logout}>
@@ -360,19 +546,20 @@ const styles = StyleSheet.create({
   introSub: { fontSize: 14, color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.21, marginTop: 2 },
 
   /* Tabs */
-  tabRow: { flexDirection: 'row', marginTop: 24, marginBottom: 20, gap: 12 },
+  tabRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 24, marginBottom: 20, gap: 10 },
   tabBtn: {
-    flex: 1,
-    height: 46,
-    borderRadius: 23,
+    flexBasis: '47%',
+    height: 42,
+    borderRadius: 21,
     borderWidth: 1,
     borderColor: '#888',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 6,
   },
   tabBtnActive: { backgroundColor: '#FFFFFF', borderColor: '#FFFFFF' },
-  tabText: { fontSize: 14, fontWeight: '600', color: '#AAA' },
+  tabText: { fontSize: 13, fontWeight: '600', color: '#AAA' },
   tabTextActive: { color: '#2F2F2F' },
 
   /* Form */
@@ -483,5 +670,72 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoutText: { fontSize: 16, fontWeight: '600', color: '#FFF' },
+
+  /* Query Filters */
+  filterRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  filterChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+  },
+  filterChipActive: { backgroundColor: '#0A3B87' },
+  filterChipText: { fontSize: 12, fontWeight: '600', color: '#888' },
+  filterChipTextActive: { color: '#FFF' },
+
+  /* Query cards */
+  queryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  queryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  queryStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  queryCourseBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#FFF',
+    backgroundColor: '#0A3B87',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  queryDate: { fontSize: 11, color: '#888', marginLeft: 'auto' },
+  queryStudentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  queryStudentName: { fontSize: 13, fontWeight: '600', color: '#0A3B87' },
+  queryStudentRoll: { fontSize: 11, color: '#888' },
+  queryQuestion: { fontSize: 14, fontWeight: '500', color: '#2F2F2F', lineHeight: 20 },
+  queryAnswerBox: {
+    marginTop: 12,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    padding: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#2ecc71',
+  },
+  queryAnswerLabel: { fontSize: 11, fontWeight: '700', color: '#2ecc71', marginBottom: 4, textTransform: 'uppercase' },
+  queryAnswerText: { fontSize: 13, color: '#555', lineHeight: 19 },
+  queryPendingHint: { fontSize: 11, color: '#e67e22', marginTop: 8, fontStyle: 'italic' },
 });
 

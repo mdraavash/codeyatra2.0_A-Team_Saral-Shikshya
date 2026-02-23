@@ -8,9 +8,8 @@ from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmb
 
 load_dotenv()
 
-# -----------------------------
+
 # Initialize LLM
-# -----------------------------
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=os.getenv("GOOGLE_API_KEY"),
@@ -24,10 +23,9 @@ embeddings_model = GoogleGenerativeAIEmbeddings(
     google_api_key=os.getenv("GOOGLE_API_KEY")
 )
 
-# -----------------------------
+
 # Spam and moderation functions
-# -----------------------------
-CUSTOM_BAD_WORDS = ["muji","randi","machikne","fuck","bitch","idiot","stupid"]
+CUSTOM_BAD_WORDS = ["You will die"]
 
 def contains_custom_profanity(text):
     text_lower = text.lower()
@@ -74,9 +72,8 @@ def moderate_text(text):
     blocked = llm_result["label"] != "SAFE" and llm_result["confidence"] > 0.6
     return {"label":llm_result["label"],"confidence":llm_result["confidence"],"blocked":blocked,"source":"llm"}
 
-# -----------------------------
+
 # Emotion detection
-# -----------------------------
 def detect_emotion(text):
     prompt = f"""
 You are an AI emotion detection system for classroom analytics.
@@ -94,9 +91,8 @@ Return ONLY valid JSON: {{"emotion":"CONFUSED","confidence":0.85}}
     except:
         return {"emotion":"NEUTRAL","confidence":0}
 
-# -----------------------------
+
 # Embedding utilities
-# -----------------------------
 def get_embedding(text):
     return embeddings_model.embed(text)
 
@@ -127,9 +123,7 @@ def get_embedding(text):
 
 #     return {"results": list(results)}
 
-# -----------------------------
 # Question clustering (optional)
-# -----------------------------
 def cluster_questions(question_list):
     if not question_list: return []
     prompt = f"""

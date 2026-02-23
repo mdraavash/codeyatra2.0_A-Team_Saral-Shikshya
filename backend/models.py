@@ -74,11 +74,10 @@ class NotificationResponse(BaseModel):
     created_at: str
 
 
-# ── Rating ──
 class RatingCreate(BaseModel):
     query_id: str
     teacher_id: str
-    rating: int          # 1-5
+    rating: int         
 
 class RatingResponse(BaseModel):
     id: str

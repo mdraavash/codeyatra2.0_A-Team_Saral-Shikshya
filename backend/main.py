@@ -8,7 +8,7 @@ from routes.admin_routes import router as admin_router
 
 app = FastAPI()
 
-# Allow requests from Expo dev client
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routes
 app.include_router(auth_router)
 app.include_router(course_router)
 app.include_router(query_router)

@@ -32,7 +32,7 @@ export default function AnswerDetail() {
 
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
-  // Check if student already rated this query
+
   useEffect(() => {
     const checkRating = async () => {
       try {
@@ -226,7 +226,6 @@ const styles = StyleSheet.create({
 
   scrollContent: { paddingHorizontal: 17, paddingTop: 20, paddingBottom: 40 },
 
-  /* Sections */
   section: {
     backgroundColor: '#444444',
     borderRadius: 18,
@@ -263,14 +262,13 @@ const styles = StyleSheet.create({
     lineHeight: 26,
   },
 
-  /* Divider */
   divider: {
     height: 1,
     backgroundColor: '#444444',
     marginVertical: 8,
   },
 
-  /* Rating Section */
+
   ratingSection: {
     backgroundColor: '#444444',
     borderRadius: 18,

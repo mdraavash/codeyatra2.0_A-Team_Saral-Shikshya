@@ -50,4 +50,7 @@ export const API = {
   ADMIN_DELETE_TEACHER: (teacherId: string) => `${API_BASE_URL}/admin/teachers/${teacherId}`,
   ADMIN_SUBJECTS: `${API_BASE_URL}/admin/subjects`,
   ADMIN_DELETE_SUBJECT: (subjectId: string) => `${API_BASE_URL}/admin/subjects/${subjectId}`,
+  ADMIN_STUDENTS: `${API_BASE_URL}/admin/students`,
+  ADMIN_DELETE_STUDENT: (studentId: string) => `${API_BASE_URL}/admin/students/${studentId}`,
+  ADMIN_QUERIES: `${API_BASE_URL}/admin/queries`,
 };
