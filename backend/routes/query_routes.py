@@ -8,14 +8,14 @@ from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse
 router = APIRouter(prefix="/queries", tags=["Queries"])
 
 
-def _query_doc(q) -> QueryResponse:
+def _query_doc(q, anonymous: bool = False) -> QueryResponse:
     return QueryResponse(
         id=str(q["_id"]),
         course_id=q["course_id"],
         course_name=q.get("course_name", ""),
         student_id=q["student_id"],
-        student_name=q.get("student_name", ""),
-        student_roll=q.get("student_roll", ""),
+        student_name="Anonymous" if anonymous else q.get("student_name", ""),
+        student_roll="Anonymous" if anonymous else q.get("student_roll", ""),
         question=q["question"],
         answer=q.get("answer"),
         answered=q.get("answered", False),
@@ -66,7 +66,7 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     # notify teacher for new query
     await db["notifications"].insert_one({
         "user_id": course["teacher_id"],
-        "message": f"{current_user.get('roll', '')} Raised a Question on {course['name']}",
+        "message": f"A student raised a question on {course['name']}",
         "query_id": str(result.inserted_id),
         "course_id": body.course_id,
         "read": False,
@@ -111,7 +111,7 @@ async def answer_query(query_id: str, body: QueryAnswer, current_user=Depends(ge
     })
 
     updated = await db["queries"].find_one({"_id": ObjectId(query_id)})
-    return _query_doc(updated)
+    return _query_doc(updated, anonymous=True)
 
 
 # queries for a course
@@ -179,7 +179,7 @@ async def teacher_queries(current_user=Depends(get_current_user)):
     queries = await db["queries"].find(
         {"teacher_id": teacher_id}
     ).sort("created_at", -1).to_list(100)
-    return [_query_doc(q) for q in queries]
+    return [_query_doc(q, anonymous=True) for q in queries]
 
 
 # unanswered queries
@@ -192,7 +192,7 @@ async def teacher_pending_queries(current_user=Depends(get_current_user)):
     queries = await db["queries"].find(
         {"teacher_id": teacher_id, "answered": False}
     ).sort("created_at", -1).to_list(100)
-    return [_query_doc(q) for q in queries]
+    return [_query_doc(q, anonymous=True) for q in queries]
 
 
 # notifications
@@ -228,15 +228,17 @@ async def teacher_course_students(course_id: str, current_user=Depends(get_curre
         {"course_id": course_id, "teacher_id": teacher_id}
     ).to_list(500)
     students = {}
+    counter = 1
     for q in queries:
         sid = q["student_id"]
         if sid not in students:
             students[sid] = {
                 "student_id": sid,
-                "student_roll": q.get("student_roll", q.get("student_name", "Unknown")),
-                "student_name": q.get("student_name", "Unknown"),
+                "student_roll": f"Anonymous Student {counter}",
+                "student_name": "Anonymous",
                 "has_pending": False,
             }
+            counter += 1
         if not q.get("answered", False):
             students[sid]["has_pending"] = True
     return list(students.values())
@@ -251,7 +253,7 @@ async def teacher_student_queries(course_id: str, student_id: str, current_user=
     queries = await db["queries"].find(
         {"course_id": course_id, "student_id": student_id, "teacher_id": str(current_user["_id"])}
     ).sort("created_at", -1).to_list(100)
-    return [_query_doc(q) for q in queries]
+    return [_query_doc(q, anonymous=True) for q in queries]
 
 
 # ── Ratings ──
