@@ -66,7 +66,7 @@ export default function CourseDetail() {
         {/* Course Info Card */}
         <View style={styles.courseInfoCard}>
           <View style={styles.courseInfoIcon}>
-            <MaterialCommunityIcons name="book-open-variant" size={32} color="#6C63FF" />
+            <MaterialCommunityIcons name="book-open-variant" size={32} color="#0A3B87" />
           </View>
           <Text style={styles.courseInfoName}>{courseName}</Text>
           <Text style={styles.courseInfoTeacher}>Instructor: {teacherName}</Text>
@@ -83,8 +83,8 @@ export default function CourseDetail() {
               })
             }
           >
-            <View style={[styles.actionIconWrap, { backgroundColor: 'rgba(108, 99, 255, 0.15)' }]}>
-              <Ionicons name="create-outline" size={24} color="#6C63FF" />
+            <View style={[styles.actionIconWrap, { backgroundColor: 'rgba(10, 59, 135, 0.15)' }]}>
+              <Ionicons name="create-outline" size={24} color="#0A3B87" />
             </View>
             <Text style={styles.actionTitle}>Ask Query</Text>
             <Text style={styles.actionSub}>Submit a new question</Text>
@@ -100,8 +100,8 @@ export default function CourseDetail() {
               })
             }
           >
-            <View style={[styles.actionIconWrap, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-              <Ionicons name="checkmark-done-outline" size={24} color="#4ECDC4" />
+            <View style={[styles.actionIconWrap, { backgroundColor: 'rgba(46, 204, 113, 0.15)' }]}>
+              <Ionicons name="checkmark-done-outline" size={24} color="#2ecc71" />
             </View>
             <Text style={styles.actionTitle}>Answered</Text>
             <Text style={styles.actionSub}>View teacher replies</Text>
@@ -109,15 +109,15 @@ export default function CourseDetail() {
         </View>
 
         <View style={styles.sectionHeader}>
-          <Ionicons name="help-circle-outline" size={20} color="#FFD93D" />
+          <Ionicons name="help-circle-outline" size={20} color="#FFD700" />
           <Text style={styles.sectionTitle}>Frequently Asked</Text>
         </View>
 
         {loading ? (
-          <ActivityIndicator color="#6C63FF" style={{ marginTop: 20 }} />
+          <ActivityIndicator color="#444" style={{ marginTop: 20 }} />
         ) : faqs.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="chatbubble-ellipses-outline" size={32} color="#555" />
+            <Ionicons name="chatbubble-ellipses-outline" size={32} color="#888" />
             <Text style={styles.emptyText}>No FAQs yet</Text>
           </View>
         ) : (
@@ -146,7 +146,7 @@ export default function CourseDetail() {
               {faq.answer && (
                 <View style={styles.faqTapHint}>
                   <Text style={styles.faqTapHintText}>Tap to view & rate</Text>
-                  <Ionicons name="chevron-forward" size={14} color="#6C63FF" />
+                  <Ionicons name="chevron-forward" size={14} color="#0A3B87" />
                 </View>
               )}
             </TouchableOpacity>
@@ -158,7 +158,7 @@ export default function CourseDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
 
   headerBar: {
     flexDirection: 'row',
@@ -166,51 +166,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomColor: '#444444',
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitleWrap: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
-  headerSubtitle: { fontSize: 12, color: '#6C63FF', marginTop: 2 },
+  headerSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
 
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 20, paddingBottom: 40 },
 
   courseInfoCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 28,
     alignItems: 'center',
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    borderColor: '#F5F5F5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   courseInfoIcon: {
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: 'rgba(108, 99, 255, 0.12)',
+    backgroundColor: 'rgba(10, 59, 135, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 14,
   },
   courseInfoName: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', textAlign: 'center' },
-  courseInfoTeacher: { fontSize: 14, color: '#888', marginTop: 6 },
+  courseInfoTeacher: { fontSize: 14, color: '#FFFFFF', marginTop: 6 },
 
   actionsRow: { flexDirection: 'row', gap: 14, marginBottom: 28 },
   actionCard: {
     flex: 1,
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   actionIconWrap: {
     width: 48,
@@ -220,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
-  actionTitle: { fontSize: 16, fontWeight: '700', color: '#FFFFFF', marginBottom: 4 },
+  actionTitle: { fontSize: 16, fontWeight: '700', color: '#2F2F2F', marginBottom: 4 },
   actionSub: { fontSize: 12, color: '#888' },
 
   sectionHeader: {
@@ -229,30 +237,31 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 16,
   },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
+  sectionTitle: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', letterSpacing: 0.21 },
 
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 16,
     paddingVertical: 30,
     alignItems: 'center',
     gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
   },
-  emptyText: { fontSize: 14, color: '#666' },
+  emptyText: { fontSize: 14, color: '#888' },
 
   faqCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 18,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
     borderLeftWidth: 3,
-    borderLeftColor: '#6C63FF',
+    borderLeftColor: '#0A3B87',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  faqQuestion: { fontSize: 14, fontWeight: '600', color: '#FFFFFF', lineHeight: 20 },
+  faqQuestion: { fontSize: 14, fontWeight: '600', color: '#2F2F2F', lineHeight: 20 },
   faqAnswer: { fontSize: 13, color: '#888', lineHeight: 20, marginTop: 8 },
   faqTapHint: {
     flexDirection: 'row',
@@ -261,5 +270,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: 'flex-end',
   },
-  faqTapHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
+  faqTapHintText: { fontSize: 12, fontWeight: '600', color: '#0A3B87' },
 });

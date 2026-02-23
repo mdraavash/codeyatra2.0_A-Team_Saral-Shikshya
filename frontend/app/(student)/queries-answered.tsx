@@ -67,15 +67,15 @@ export default function QueriesAnswered() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Stats */}
         <View style={styles.statsCard}>
-          <Ionicons name="checkmark-done-circle" size={28} color="#4ECDC4" />
+          <Ionicons name="checkmark-done-circle" size={28} color="#2ecc71" />
           <Text style={styles.statsText}>{queries.length} answered quer{queries.length === 1 ? 'y' : 'ies'}</Text>
         </View>
 
         {loading ? (
-          <ActivityIndicator color="#6C63FF" style={{ marginTop: 30 }} />
+          <ActivityIndicator color="#444" style={{ marginTop: 30 }} />
         ) : queries.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="chatbubble-ellipses-outline" size={40} color="#555" />
+            <Ionicons name="chatbubble-ellipses-outline" size={40} color="#888" />
             <Text style={styles.emptyText}>No answered queries yet</Text>
             <Text style={styles.emptySubText}>Teacher responses will show up here</Text>
           </View>
@@ -102,7 +102,7 @@ export default function QueriesAnswered() {
               <Text style={styles.queryAnswer} numberOfLines={2}>{q.answer ?? ''}</Text>
               <View style={styles.tapHint}>
                 <Text style={styles.tapHintText}>View full answer & rate</Text>
-                <Ionicons name="expand-outline" size={14} color="#6C63FF" />
+                <Ionicons name="expand-outline" size={14} color="#0A3B87" />
               </View>
             </TouchableOpacity>
           ))
@@ -113,7 +113,7 @@ export default function QueriesAnswered() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
 
   headerBar: {
     flexDirection: 'row',
@@ -121,58 +121,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomColor: '#444444',
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#444444',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitleWrap: { flex: 1, alignItems: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
-  headerSubtitle: { fontSize: 12, color: '#6C63FF', marginTop: 2 },
+  headerSubtitle: { fontSize: 12, color: '#888', marginTop: 2 },
 
-  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 20, paddingBottom: 40 },
 
   statsCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: 'rgba(78, 205, 196, 0.08)',
-    borderRadius: 14,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
     padding: 16,
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(78, 205, 196, 0.15)',
+    borderLeftWidth: 4,
+    borderLeftColor: '#2ecc71',
   },
-  statsText: { fontSize: 15, fontWeight: '600', color: '#4ECDC4' },
+  statsText: { fontSize: 15, fontWeight: '600', color: '#2ecc71' },
 
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#F5F5F5',
     borderRadius: 20,
     paddingVertical: 50,
     alignItems: 'center',
     gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
   },
-  emptyText: { fontSize: 16, fontWeight: '600', color: '#666' },
-  emptySubText: { fontSize: 13, color: '#555' },
+  emptyText: { fontSize: 16, fontWeight: '600', color: '#888' },
+  emptySubText: { fontSize: 13, color: '#888' },
 
   queryCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 18,
     marginBottom: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
     borderLeftWidth: 3,
-    borderLeftColor: '#4ECDC4',
+    borderLeftColor: '#2ecc71',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#FFFFFF', lineHeight: 22 },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#2F2F2F', lineHeight: 22 },
   queryAnswer: { fontSize: 14, color: '#888', lineHeight: 20, marginTop: 10 },
   tapHint: {
     flexDirection: 'row',
@@ -181,5 +182,5 @@ const styles = StyleSheet.create({
     marginTop: 12,
     alignSelf: 'flex-end',
   },
-  tapHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
+  tapHintText: { fontSize: 12, fontWeight: '600', color: '#0A3B87' },
 });

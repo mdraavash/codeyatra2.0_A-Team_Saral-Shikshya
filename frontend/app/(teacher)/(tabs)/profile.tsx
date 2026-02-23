@@ -56,7 +56,7 @@ export default function TeacherProfile() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#6C63FF" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#444" style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -75,7 +75,7 @@ export default function TeacherProfile() {
           <Text style={styles.profileRole}>Professor</Text>
           <View style={styles.profileDivider} />
           <View style={styles.profileInfoRow}>
-            <Ionicons name="id-card-outline" size={16} color="rgba(255,255,255,0.4)" />
+            <Ionicons name="id-card-outline" size={16} color="#888" />
             <Text style={styles.profileInfoText}>{user?.roll ?? 'N/A'}</Text>
           </View>
         </View>
@@ -89,7 +89,7 @@ export default function TeacherProfile() {
                 key={star}
                 name={star <= Math.round(avgRating) ? 'star' : star - 0.5 <= avgRating ? 'star-half' : 'star-outline'}
                 size={28}
-                color={star <= Math.round(avgRating) ? '#FFD93D' : 'rgba(255,255,255,0.2)'}
+                color={star <= Math.round(avgRating) ? '#FFD700' : '#B7B7B7'}
               />
             ))}
           </View>
@@ -109,15 +109,15 @@ export default function TeacherProfile() {
         {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={[styles.statNum, { color: '#6C63FF' }]}>{totalQueries}</Text>
+            <Text style={[styles.statNum, { color: '#0A3B87' }]}>{totalQueries}</Text>
             <Text style={styles.statLabel}>Total Queries</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={[styles.statNum, { color: '#4ECDC4' }]}>{answeredQueries}</Text>
+            <Text style={[styles.statNum, { color: '#2ecc71' }]}>{answeredQueries}</Text>
             <Text style={styles.statLabel}>Answered</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={[styles.statNum, { color: '#FF6B6B' }]}>{totalQueries - answeredQueries}</Text>
+            <Text style={[styles.statNum, { color: '#e67e22' }]}>{totalQueries - answeredQueries}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
         </View>
@@ -133,80 +133,91 @@ export default function TeacherProfile() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 110 },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
+  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
 
-  screenTitle: { fontSize: 28, fontWeight: '800', color: '#FFF', marginBottom: 20 },
+  screenTitle: { fontSize: 22, fontWeight: '600', color: '#FFF', marginBottom: 20 },
 
   /* Profile Card */
   profileCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 28,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#F5F5F5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   avatar: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#6C63FF',
+    backgroundColor: '#0A3B87',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 14,
   },
   avatarText: { fontSize: 30, fontWeight: '700', color: '#FFF' },
-  profileName: { fontSize: 22, fontWeight: '700', color: '#FFF' },
-  profileRole: { fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
+  profileName: { fontSize: 22, fontWeight: '600', color: '#FFF' },
+  profileRole: { fontSize: 14, color: '#FFFFFF', marginTop: 4 },
   profileDivider: {
     width: '60%',
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#F5F5F5',
     marginVertical: 18,
   },
   profileInfoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  profileInfoText: { fontSize: 14, color: 'rgba(255,255,255,0.6)' },
+  profileInfoText: { fontSize: 14, color: '#FFFFFF' },
 
   /* Rating */
   ratingCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     marginTop: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 217, 61, 0.12)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  ratingTitle: { fontSize: 16, fontWeight: '700', color: '#FFF', marginBottom: 14 },
+  ratingTitle: { fontSize: 16, fontWeight: '700', color: '#2F2F2F', marginBottom: 14 },
   ratingStarsRow: { flexDirection: 'row', gap: 6, marginBottom: 10 },
-  ratingValue: { fontSize: 22, fontWeight: '800', color: '#FFD93D' },
-  ratingLabel: { fontSize: 14, fontWeight: '600', color: 'rgba(255, 217, 61, 0.7)', marginTop: 4 },
-  ratingCount: { fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 8 },
+  ratingValue: { fontSize: 22, fontWeight: '800', color: '#FFD700' },
+  ratingLabel: { fontSize: 14, fontWeight: '600', color: '#e67e22', marginTop: 4 },
+  ratingCount: { fontSize: 12, color: '#888', marginTop: 8 },
 
   /* Stats */
   statsRow: { flexDirection: 'row', gap: 10, marginTop: 16 },
   statCard: {
     flex: 1,
-    backgroundColor: '#16213E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    shadowColor: '#C4C4C4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statNum: { fontSize: 22, fontWeight: '800' },
-  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, fontWeight: '600' },
+  statLabel: { fontSize: 11, color: '#888', marginTop: 4, fontWeight: '600' },
 
   /* Logout */
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF6B6B',
-    height: 54,
-    borderRadius: 16,
-    marginTop: 28,
+    backgroundColor: '#e74c3c',
+    height: 50,
+    borderRadius: 25,
+    marginTop: 30,
     gap: 8,
   },
   logoutText: { fontSize: 16, fontWeight: '600', color: '#FFF' },
