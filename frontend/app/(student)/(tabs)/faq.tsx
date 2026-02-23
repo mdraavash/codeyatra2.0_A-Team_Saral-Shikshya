@@ -20,7 +20,8 @@ interface FAQ {
   question: string;
   answer: string | null;
   course_name: string;
-  student_name: string;
+  frequency: number;
+  student_name?: string;
   teacher_id?: string;
 }
 
@@ -100,11 +101,17 @@ export default function FAQScreen() {
                   <View style={styles.faqBadge}>
                     <Text style={styles.faqBadgeText}>{faq.course_name}</Text>
                   </View>
-                  <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={18}
-                    color="#888"
-                  />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={styles.freqBadge}>
+                      <Ionicons name="people" size={12} color="#f5f5f5" />
+                      <Text style={styles.freqBadgeText}>{faq.frequency}</Text>
+                    </View>
+                    <Ionicons
+                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={18}
+                      color="#888"
+                    />
+                  </View>
                 </View>
                 <Text style={styles.faqQuestion} numberOfLines={isExpanded ? undefined : 2}>
                   {faq.question}
@@ -218,4 +225,16 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   viewFullBtnText: { fontSize: 13, fontWeight: '600', color: '#f5f5f5' },
+
+  /* Frequency badge */
+  freqBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(78, 205, 196, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  freqBadgeText: { fontSize: 11, fontWeight: '700', color: '#4ECDC4' },
 });

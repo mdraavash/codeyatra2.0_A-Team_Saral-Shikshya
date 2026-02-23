@@ -107,6 +107,7 @@ class EmbeddedQuestionCreate(BaseModel):
 class EmbeddedQuestionResponse(BaseModel):
     id: str
     course_id: Optional[str]
+    course_name: Optional[str] = None
     question: str
     frequency: int
     answer: Optional[str] = None

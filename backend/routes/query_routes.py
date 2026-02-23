@@ -2,10 +2,11 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from bson import ObjectId
 from datetime import datetime, timezone
+import asyncio
 from database import get_database
 from auth import get_current_user
 from models import QueryCreate, QueryAnswer, QueryResponse, NotificationResponse, RatingCreate, RatingResponse, TeacherRatingResponse, EmbeddedQuestionResponse
-from aimodels import moderate_text, get_embedding, find_best_match, detect_subject_relevance, search_answered_questions_vector, search_faq_vector
+from aimodels import moderate_text, get_embedding, find_best_match, detect_subject_relevance, search_answered_questions_vector, search_faq_vector, search_answered_local, search_faq_local
 from config import EMBEDDING_SIMILARITY_THRESHOLD, EMBEDDING_SEARCH_CANDIDATES, SUBJECT_VALIDATION_ENABLED, SUBJECT_VALIDATION_CONFIDENCE_THRESHOLD
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
@@ -53,8 +54,24 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # --- Moderation (Awaited) ---
-    moderation = await moderate_text(body.question)
+    # --- Run moderation, subject validation, and embedding in PARALLEL ---
+    async def _safe_embedding():
+        try:
+            return await get_embedding(body.question)
+        except Exception:
+            return None
+
+    tasks = [moderate_text(body.question), _safe_embedding()]
+    if SUBJECT_VALIDATION_ENABLED:
+        tasks.append(detect_subject_relevance(body.question, course["name"]))
+
+    results = await asyncio.gather(*tasks)
+
+    moderation = results[0]
+    query_emb = results[1]
+    subject_check = results[2] if SUBJECT_VALIDATION_ENABLED else None
+
+    # --- Check moderation result ---
     if moderation.get("blocked") and moderation.get("confidence", 0) > 0.8:
         return JSONResponse(
             status_code=400,
@@ -65,36 +82,51 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
             },
         )
 
-    # --- Subject Validation (Awaited) ---
-    if SUBJECT_VALIDATION_ENABLED:
-        subject_check = await detect_subject_relevance(body.question, course["name"])
-        if not subject_check.get("is_relevant"):
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "detail": f"Your question doesn't seem to be about {course['name']}. Please ask subject-related questions.",
-                    "subject_invalid": True,
-                    "reason": subject_check.get("reason", ""),
-                },
-            )
-
-    # --- Generate embedding (Awaited) ---
-    try:
-        query_emb = await get_embedding(body.question)
-    except Exception:
-        query_emb = None
+    # --- Check subject validation result ---
+    if SUBJECT_VALIDATION_ENABLED and subject_check and not subject_check.get("is_relevant"):
+        return JSONResponse(
+            status_code=400,
+            content={
+                "detail": f"Your question doesn't seem to be about {course['name']}. Please ask subject-related questions.",
+                "subject_invalid": True,
+                "reason": subject_check.get("reason", ""),
+            },
+        )
 
     embedded_question_id = None
 
-    # --- Step 1: Check Answered Queries (Awaited) ---
+    # --- Duplicate check: run both searches in PARALLEL ---
     if query_emb is not None:
-        answered = await search_answered_questions_vector(
-            db, query_emb, body.course_id, limit=1
-        )
+        async def _search_answered():
+            try:
+                results = await search_answered_questions_vector(db, query_emb, body.course_id, limit=1)
+                if results:
+                    return results
+            except Exception:
+                pass
+            try:
+                return await search_answered_local(db, query_emb, body.course_id, limit=1)
+            except Exception:
+                return None
+
+        async def _search_faq():
+            try:
+                results = await search_faq_vector(db, query_emb, body.course_id, limit=1)
+                if results:
+                    return results
+            except Exception:
+                pass
+            try:
+                return await search_faq_local(db, query_emb, body.course_id, limit=1)
+            except Exception:
+                return None
+
+        answered, faqs = await asyncio.gather(_search_answered(), _search_faq())
+
+        # --- Check answered queries match ---
         if answered:
             best = answered[0]
             score = best.get("similarityScore", 0)
-
             if score >= EMBEDDING_SIMILARITY_THRESHOLD:
                 return JSONResponse(
                     status_code=200,
@@ -109,10 +141,28 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
                     },
                 )
 
-    # --- Step 2: Check Existing FAQ (Awaited) ---
-    if query_emb is not None:
-        faqs = await search_faq_vector(db, query_emb, body.course_id, limit=1)
-
+        # --- Check FAQ match ---
+        if faqs:
+            best = faqs[0]
+            score = best.get("similarityScore", 0)
+            if score >= EMBEDDING_SIMILARITY_THRESHOLD:
+                await db["embedded_questions"].update_one(
+                    {"_id": best["_id"]},
+                    {"$inc": {"frequency": 1}}
+                )
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "matched": True,
+                        "similarity": score,
+                        "faq": {
+                            "id": str(best["_id"]),
+                            "question": best["question"],
+                            "answer": best["answer"],
+                            "frequency": best.get("frequency", 0) + 1,
+                        },
+                    },
+                )
         if faqs:
             best = faqs[0]
             score = best.get("similarityScore", 0)
@@ -139,16 +189,19 @@ async def create_query(body: QueryCreate, current_user=Depends(get_current_user)
 
     # --- Step 3: Create New Embedded Question ---
     if query_emb is not None:
-        embedded_doc = await db["embedded_questions"].insert_one({
-            "course_id": body.course_id,
-            "question": body.question,
-            "embedding": query_emb,
-            "frequency": 1,
-            "answer": None,
-            "created_at": datetime.now(timezone.utc),
-            "updated_at": datetime.now(timezone.utc),
-        })
-        embedded_question_id = embedded_doc.inserted_id
+        try:
+            embedded_doc = await db["embedded_questions"].insert_one({
+                "course_id": body.course_id,
+                "question": body.question,
+                "embedding": query_emb,
+                "frequency": 1,
+                "answer": None,
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+            })
+            embedded_question_id = embedded_doc.inserted_id
+        except Exception as e:
+            print(f"Embedded question insert failed: {e}")
 
     # --- Step 4: Create Query ---
     doc = {
@@ -260,17 +313,27 @@ async def answered_queries_for_course(course_id: str, current_user=Depends(get_c
     return [_query_doc(q) for q in queries]
 
 
-# FAQ visibke to all students
+# FAQ visible to all students (only frequency > 2, sorted highest first)
 @router.get("/course/{course_id}/faq", response_model=list[EmbeddedQuestionResponse])
 async def faq_for_course(course_id: str, current_user=Depends(get_current_user)):
     db = get_database()
     faqs = await db["embedded_questions"].find(
-        {"course_id": course_id, "answer": {"$ne": None}}
+        {"course_id": course_id, "answer": {"$ne": None}, "frequency": {"$gt": 2}}
     ).sort("frequency", -1).to_list(50)
+
+    # Batch-fetch course names
+    course_ids = list({f["course_id"] for f in faqs if f.get("course_id")})
+    courses = {}
+    if course_ids:
+        cursor = db["courses"].find({"_id": {"$in": [ObjectId(c) for c in course_ids]}})
+        async for c in cursor:
+            courses[str(c["_id"])] = c.get("name", "")
+
     return [
         EmbeddedQuestionResponse(
             id=str(f["_id"]),
             course_id=f.get("course_id"),
+            course_name=courses.get(f.get("course_id", ""), ""),
             question=f.get("question"),
             frequency=f.get("frequency", 0),
             answer=f.get("answer"),
@@ -279,17 +342,27 @@ async def faq_for_course(course_id: str, current_user=Depends(get_current_user))
     ]
 
 
-# FaQ of all subjects
+# FAQ of all subjects (only frequency > 2, sorted highest first)
 @router.get("/faq/all", response_model=list[EmbeddedQuestionResponse])
 async def all_faq(current_user=Depends(get_current_user)):
     db = get_database()
     faqs = await db["embedded_questions"].find(
-        {"answer": {"$ne": None}}
+        {"answer": {"$ne": None}, "frequency": {"$gt": 2}}
     ).sort("frequency", -1).to_list(200)
+
+    # Batch-fetch course names
+    course_ids = list({f["course_id"] for f in faqs if f.get("course_id")})
+    courses = {}
+    if course_ids:
+        cursor = db["courses"].find({"_id": {"$in": [ObjectId(c) for c in course_ids]}})
+        async for c in cursor:
+            courses[str(c["_id"])] = c.get("name", "")
+
     return [
         EmbeddedQuestionResponse(
             id=str(f["_id"]),
             course_id=f.get("course_id"),
+            course_name=courses.get(f.get("course_id", ""), ""),
             question=f.get("question"),
             frequency=f.get("frequency", 0),
             answer=f.get("answer"),

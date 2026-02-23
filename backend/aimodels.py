@@ -3,7 +3,6 @@ import json
 import re
 import csv
 import numpy as np
-import os
 import asyncio
 from dotenv import load_dotenv
 from ai_clients import hf_client, llm
@@ -85,8 +84,9 @@ async def search_atlas_vector(db, collection_name, query_embedding, filter_dict=
         }
     ]
 
+    # Timeout after 3s so we fall back to local search quickly
     cursor = db[collection_name].aggregate(pipeline)
-    return await cursor.to_list(length=limit)    
+    return await asyncio.wait_for(cursor.to_list(length=limit), timeout=3.0)    
 
 #Logic Required by Query Routes
 
@@ -116,4 +116,53 @@ async def search_answered_questions_vector(db, query_embedding, course_id, limit
 async def search_faq_vector(db, query_embedding, course_id, limit=5):
     filters = {"course_id": {"$eq": course_id}, "answer": {"$exists": True}}
     results = await search_atlas_vector(db, "embedded_questions", query_embedding, filters, limit)
+    return sorted(results, key=lambda x: x.get("frequency", 0), reverse=True)
+
+
+# ---- Local cosine similarity fallback (no Atlas Vector Search index needed) ----
+
+def _cosine_similarity(a, b):
+    """Compute cosine similarity between two vectors."""
+    a = np.array(a, dtype=np.float32)
+    b = np.array(b, dtype=np.float32)
+    dot = np.dot(a, b)
+    norm = np.linalg.norm(a) * np.linalg.norm(b)
+    if norm == 0:
+        return 0.0
+    return float(dot / norm)
+
+
+async def _local_vector_search(db, collection_name, query_embedding, mongo_filter, limit=5):
+    """Fetch docs with embeddings from MongoDB, compute cosine similarity locally."""
+    cursor = db[collection_name].find(
+        {**mongo_filter, "embedding": {"$exists": True, "$ne": None}},
+        {"_id": 1, "question": 1, "answer": 1, "course_id": 1, "frequency": 1,
+         "embedding": 1, "answered": 1},
+    )
+    docs = await cursor.to_list(length=200)   # cap to avoid loading too many
+
+    scored = []
+    for doc in docs:
+        emb = doc.get("embedding")
+        if not emb:
+            continue
+        score = _cosine_similarity(query_embedding, emb)
+        doc["similarityScore"] = score
+        doc.pop("embedding", None)            # don't send embedding back
+        scored.append(doc)
+
+    scored.sort(key=lambda x: x["similarityScore"], reverse=True)
+    return scored[:limit]
+
+
+async def search_answered_local(db, query_embedding, course_id, limit=5):
+    """Local fallback: find similar *answered* queries by cosine similarity."""
+    mongo_filter = {"course_id": course_id, "answered": True}
+    return await _local_vector_search(db, "queries", query_embedding, mongo_filter, limit)
+
+
+async def search_faq_local(db, query_embedding, course_id, limit=5):
+    """Local fallback: find similar embedded_questions by cosine similarity."""
+    mongo_filter = {"course_id": course_id}
+    results = await _local_vector_search(db, "embedded_questions", query_embedding, mongo_filter, limit)
     return sorted(results, key=lambda x: x.get("frequency", 0), reverse=True)
