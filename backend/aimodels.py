@@ -2,17 +2,15 @@ import os
 import json
 import re
 import time
+import numpy as np
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, EmbeddingsGoogleGenerativeAI
 
-# Load environment variables
 load_dotenv()
 
-# Debug: check if API key is loaded
-if not os.getenv("GOOGLE_API_KEY"):
-    raise ValueError("GOOGLE_API_KEY not found in .env file")
-
-# Initialize Gemini model
+# -----------------------------
+# Initialize LLM
+# -----------------------------
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=os.getenv("GOOGLE_API_KEY"),
@@ -20,99 +18,16 @@ llm = ChatGoogleGenerativeAI(
     max_retries=3
 )
 
-# -----------------------------
-# Rule-based spam detection
-# -----------------------------
-def rule_based_spam_score(text):
-    score = 0.0
-
-    # Too many links
-    if len(re.findall(r"http[s]?://", text)) > 1:
-        score += 0.4
-
-    # Repeated characters (e.g. looooolllll)
-    if re.search(r"(.)\1{4,}", text):
-        score += 0.3
-
-    # All caps message
-    if text.isupper():
-        score += 0.2
-
-    # Repeated words
-    words = text.lower().split()
-    if len(words) != len(set(words)):
-        score += 0.1
-
-    return min(score, 1.0)
-
+# Embedding model
+embeddings_model = EmbeddingsGoogleGenerativeAI(
+    model="textembedding-gecko-001",
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
 
 # -----------------------------
-# LLM-based moderation
+# Spam and moderation functions
 # -----------------------------
-def llm_moderation(text):
-    prompt = f"""
-You are a strict academic content moderation AI.
-
-Classify the message into ONE of these categories:
-SAFE
-HATE_SPEECH
-HARASSMENT
-SPAM
-SEXUAL
-VIOLENCE
-
-Message:
-"{text}"
-
-Return ONLY valid JSON like:
-{{
-  "label": "SAFE",
-  "confidence": 0.95
-}}
-
-Do not include markdown formatting.
-"""
-
-    try:
-        response = llm.invoke(prompt)
-        content = response.content.strip()
-
-        # Remove markdown code block if exists
-        if content.startswith("```"):
-            content = content.replace("```json", "")
-            content = content.replace("```", "")
-            content = content.strip()
-
-        parsed = json.loads(content)
-
-        return {
-            "label": parsed.get("label", "ERROR"),
-            "confidence": float(parsed.get("confidence", 0))
-        }
-
-    except Exception as e:
-        print("----- LLM ERROR -----")
-        print("Error:", e)
-        if 'response' in locals():
-            print("Raw Response:", response.content)
-        print("---------------------")
-        return {"label": "ERROR", "confidence": 0}
-
-
-# -----------------------------
-# Final moderation pipeline
-# -----------------------------
-# Custom local profanity list (add more as needed)
-CUSTOM_BAD_WORDS = [
-    "muji",
-    "randi",
-    "machikne",
-    "fuck",
-    "bitch",
-    "idiot",
-    "stupid"
-]
-
+CUSTOM_BAD_WORDS = ["muji","randi","machikne","fuck","bitch","idiot","stupid"]
 
 def contains_custom_profanity(text):
     text_lower = text.lower()
@@ -121,193 +36,114 @@ def contains_custom_profanity(text):
             return True
     return False
 
-def cluster_questions(question_list):
-    """
-    Takes a list of SAFE questions and groups them into topics using Gemini.
-    """
+def rule_based_spam_score(text):
+    score = 0.0
+    if len(re.findall(r"http[s]?://", text)) > 1: score += 0.4
+    if re.search(r"(.)\1{4,}", text): score += 0.3
+    if text.isupper(): score += 0.2
+    words = text.lower().split()
+    if len(words) != len(set(words)): score += 0.1
+    return min(score, 1.0)
 
-    if not question_list:
-        return []
-
+def llm_moderation(text):
     prompt = f"""
-You are an AI classroom assistant.
-
-Group the following student questions into logical topic clusters.
-
-Return ONLY valid JSON in this format:
-
-[
-  {{
-    "topic": "Topic Name",
-    "questions": ["question1", "question2"]
-  }}
-]
-
-Questions:
-{question_list}
+You are a strict academic content moderation AI.
+Classify the message into ONE of these categories:
+SAFE, HATE_SPEECH, HARASSMENT, SPAM, SEXUAL, VIOLENCE
+Message: "{text}"
+Return ONLY valid JSON like:
+{{"label": "SAFE", "confidence": 0.95}}
 """
-
     try:
         response = llm.invoke(prompt)
         content = response.content.strip()
-
-        # Clean markdown if exists
         if content.startswith("```"):
-            content = content.replace("```json", "")
-            content = content.replace("```", "")
-            content = content.strip()
-
-        return json.loads(content)
-
-    except Exception as e:
-        print("Clustering Error:", e)
-        return []
-    
-
-def detect_emotion(text):
-    """
-    Detect emotional tone of a student question.
-    """
-
-    prompt = f"""
-You are an AI emotion detection system for classroom analytics.
-
-Classify the emotional tone of this message into ONE of:
-
-CONFUSED
-FRUSTRATED
-CURIOUS
-ANXIOUS
-NEUTRAL
-
-Message:
-"{text}"
-
-Return ONLY valid JSON:
-{{
-  "emotion": "CONFUSED",
-  "confidence": 0.85
-}}
-"""
-
-    try:
-        response = llm.invoke(prompt)
-        content = response.content.strip()
-
-        # Clean markdown if exists
-        if content.startswith("```"):
-            content = content.replace("```json", "")
-            content = content.replace("```", "")
-            content = content.strip()
-
+            content = content.replace("```json","").replace("```","").strip()
         parsed = json.loads(content)
-
-        return {
-            "emotion": parsed.get("emotion", "NEUTRAL"),
-            "confidence": float(parsed.get("confidence", 0))
-        }
-
+        return {"label": parsed.get("label","ERROR"), "confidence": float(parsed.get("confidence",0))}
     except Exception as e:
-        print("Emotion Detection Error:", e)
-        return {
-            "emotion": "NEUTRAL",
-            "confidence": 0
-        }
+        return {"label":"ERROR","confidence":0}
 
 def moderate_text(text):
     spam_score = rule_based_spam_score(text)
-
-    # Immediate block if strong spam
     if spam_score > 0.6:
-        return {
-            "label": "SPAM",
-            "confidence": spam_score,
-            "blocked": True,
-            "source": "rule_based"
-        }
-
-    # Immediate block if custom profanity detected
+        return {"label":"SPAM","confidence":spam_score,"blocked":True,"source":"rule_based"}
     if contains_custom_profanity(text):
-        return {
-            "label": "HARASSMENT",
-            "confidence": 0.95,
-            "blocked": True,
-            "source": "custom_profanity_list"
-        }
-
+        return {"label":"HARASSMENT","confidence":0.95,"blocked":True,"source":"custom_list"}
     llm_result = llm_moderation(text)
+    blocked = llm_result["label"] != "SAFE" and llm_result["confidence"] > 0.6
+    return {"label":llm_result["label"],"confidence":llm_result["confidence"],"blocked":blocked,"source":"llm"}
 
-    # Lower threshold slightly (0.6 instead of 0.7)
-    blocked = False
-    if llm_result["label"] != "SAFE" and llm_result["confidence"] > 0.6:
-        blocked = True
+# -----------------------------
+# Emotion detection
+# -----------------------------
+def detect_emotion(text):
+    prompt = f"""
+You are an AI emotion detection system for classroom analytics.
+Classify the emotional tone into ONE of: CONFUSED, FRUSTRATED, CURIOUS, ANXIOUS, NEUTRAL
+Message: "{text}"
+Return ONLY valid JSON: {{"emotion":"CONFUSED","confidence":0.85}}
+"""
+    try:
+        response = llm.invoke(prompt)
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json","").replace("```","").strip()
+        parsed = json.loads(content)
+        return {"emotion": parsed.get("emotion","NEUTRAL"), "confidence": float(parsed.get("confidence",0))}
+    except:
+        return {"emotion":"NEUTRAL","confidence":0}
 
-    return {
-        "label": llm_result["label"],
-        "confidence": llm_result["confidence"],
-        "blocked": blocked,
-        "source": "llm"
-    }
-    
-def process_classroom_questions(question_list):
-    """
-    Full AI pipeline:
-    - Moderate each question
-    - Detect emotion (if safe)
-    - Cluster safe questions
-    - Return analytics
-    """
+# -----------------------------
+# Embedding utilities
+# -----------------------------
+def get_embedding(text):
+    return embeddings_model.embed(text)
 
-    safe_questions = []
-    moderation_results = []
-    emotion_summary = {
-        "CONFUSED": 0,
-        "FRUSTRATED": 0,
-        "CURIOUS": 0,
-        "ANXIOUS": 0,
-        "NEUTRAL": 0
-    }
+# ---- Vector Search ----
+@app.get("/search")
+def search(query: str):
+    query_embedding = get_embedding(query)
 
-    for q in question_list:
-        mod_result = moderate_text(q)
-
-        question_data = {
-            "question": q,
-            "moderation": mod_result
+    results = collection.aggregate([
+        {
+            "$vectorSearch": {
+                "index": "default",
+                "path": "embedding",
+                "queryVector": query_embedding,
+                "numCandidates": 100,
+                "limit": 5
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "title": 1,
+                "content": 1,
+                "score": {"$meta": "vectorSearchScore"}
+            }
         }
+    ])
 
-        if not mod_result["blocked"]:
-            emotion = detect_emotion(q)
-            question_data["emotion"] = emotion
-
-            safe_questions.append(q)
-
-            if emotion["emotion"] in emotion_summary:
-                emotion_summary[emotion["emotion"]] += 1
-
-        moderation_results.append(question_data)
-
-    clusters = cluster_questions(safe_questions)
-
-    return {
-        "moderation_results": moderation_results,
-        "clusters": clusters,
-        "emotion_summary": emotion_summary
-    }
+    return {"results": list(results)}
 
 # -----------------------------
-# Test run
+# Question clustering (optional)
 # -----------------------------
-if __name__ == "__main__":
-    questions = [
-        "What is recursion?",
-        "I still don't understand recursion base case",
-        "Why is this so confusing?",
-        "Can you explain stack again?",
-        "Hello teacher muji",
-        "Buy crypto now http://spam.com"
-    ]
-
-    result = process_classroom_questions(questions)
-
-    print(json.dumps(result, indent=2))
+def cluster_questions(question_list):
+    if not question_list: return []
+    prompt = f"""
+You are an AI classroom assistant.
+Group the following student questions into logical topic clusters.
+Return ONLY valid JSON like:
+[{{"topic":"Topic Name","questions":["q1","q2"]}}]
+Questions: {question_list}
+"""
+    try:
+        response = llm.invoke(prompt)
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.replace("```json","").replace("```","").strip()
+        return json.loads(content)
+    except:
+        return []
