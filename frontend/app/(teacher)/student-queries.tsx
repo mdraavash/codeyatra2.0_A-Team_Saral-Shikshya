@@ -53,26 +53,54 @@ export default function StudentQueries() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useFocusEffect(useCallback(() => { load(); }, [courseId, studentId, token]));
 
+  const pendingCount = queries.filter(q => !q.answered).length;
+  const answeredCount = queries.filter(q => q.answered).length;
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Back */}
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+        <Ionicons name="arrow-back" size={20} color="#FFF" />
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Intro Card */}
-        <View style={styles.introCard}>
-          <Text style={styles.introName}>{studentRoll} – {courseName}</Text>
-          <Text style={styles.introSub}>Questions Raised</Text>
+        {/* Header */}
+        <View style={styles.headerCard}>
+          <Text style={styles.headerTitle}>{studentRoll}</Text>
+          <Text style={styles.headerSub}>{courseName} · Questions Raised</Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Question</Text>
+        {/* Stats */}
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, { borderColor: 'rgba(108,99,255,0.2)' }]}>
+            <Text style={[styles.statNum, { color: '#6C63FF' }]}>{queries.length}</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          <View style={[styles.statCard, { borderColor: 'rgba(78,205,196,0.2)' }]}>
+            <Text style={[styles.statNum, { color: '#4ECDC4' }]}>{answeredCount}</Text>
+            <Text style={styles.statLabel}>Answered</Text>
+          </View>
+          <View style={[styles.statCard, { borderColor: 'rgba(255,107,107,0.2)' }]}>
+            <Text style={[styles.statNum, { color: '#FF6B6B' }]}>{pendingCount}</Text>
+            <Text style={styles.statLabel}>Pending</Text>
+          </View>
+        </View>
+
+        {/* Questions */}
+        <Text style={styles.sectionTitle}>Questions</Text>
 
         {loading ? (
-          <ActivityIndicator color="#FFF" style={{ marginTop: 20 }} />
+          <ActivityIndicator color="#6C63FF" style={{ marginTop: 30 }} />
         ) : queries.length === 0 ? (
-          <Text style={styles.emptyText}>No questions from this student</Text>
+          <View style={styles.emptyCard}>
+            <Ionicons name="chatbubble-outline" size={44} color="#555" />
+            <Text style={styles.emptyText}>No questions from this student</Text>
+          </View>
         ) : (
           queries.map((q) => (
             <TouchableOpacity
               key={q.id}
-              style={styles.questionCard}
+              style={styles.queryCard}
               activeOpacity={0.7}
               onPress={() => {
                 if (!q.answered) {
@@ -85,169 +113,129 @@ export default function StudentQueries() {
                       courseName: courseName,
                     },
                   });
+                } else {
+                  router.push({
+                    pathname: '/(teacher)/answer-query',
+                    params: {
+                      queryId: q.id,
+                      question: q.question,
+                      studentName: studentRoll,
+                      courseName: courseName,
+                      existingAnswer: q.answer ?? '',
+                    },
+                  });
                 }
               }}
             >
-              <Text style={styles.questionText} numberOfLines={2}>
-                {q.question}
-              </Text>
+              <Text style={styles.queryQuestion} numberOfLines={2}>{q.question}</Text>
               {q.answered ? (
-                <View style={styles.answeredBadge}>
-                  <Text style={styles.answeredBadgeText}>Answered</Text>
+                <View style={styles.queryFooter}>
+                  <View style={styles.answeredBadge}>
+                    <Ionicons name="checkmark-circle" size={14} color="#4ECDC4" />
+                    <Text style={styles.answeredText}>Answered</Text>
+                  </View>
+                  <View style={styles.editHint}>
+                    <Ionicons name="create-outline" size={14} color="#6C63FF" />
+                    <Text style={styles.editHintText}>Edit</Text>
+                  </View>
                 </View>
               ) : (
-                <View style={styles.arrowCircle}>
-                  <Text style={styles.arrowText}>{'>'}</Text>
+                <View style={styles.queryFooter}>
+                  <View style={styles.pendingBadge}>
+                    <Ionicons name="time" size={14} color="#FF6B6B" />
+                    <Text style={styles.pendingText}>Pending</Text>
+                  </View>
+                  <View style={styles.answerHint}>
+                    <Text style={styles.answerHintText}>Answer →</Text>
+                  </View>
                 </View>
               )}
             </TouchableOpacity>
           ))
         )}
       </ScrollView>
-
-      {/* Back */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color="#FFF" />
-      </TouchableOpacity>
-
-      {/* Bottom Nav Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => router.replace('/(teacher)/' as never)}>
-          <Ionicons name="home-outline" size={22} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="chatbox-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="heart-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="time-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="person-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2F2F2F' },
-  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
-
-  introCard: {
-    width: '100%',
-    height: 120,
-    backgroundColor: '#444444',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  introName: { fontSize: 22, fontWeight: '600', textAlign: 'center', color: '#FFFFFF', lineHeight: 33 },
-  introSub: { fontSize: 15, color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.225, marginTop: 2 },
-
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.21,
-    marginTop: 24,
-    marginBottom: 14,
-  },
-  emptyText: { fontSize: 13, color: '#888', marginBottom: 8 },
-
-  /* Question Card */
-  questionCard: {
-    width: '100%',
-    minHeight: 60,
-    backgroundColor: '#6F6F6F',
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  questionText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#F2F2F2',
-    letterSpacing: 0.21,
-  },
-  arrowCircle: {
-    width: 35,
-    height: 35,
-    borderRadius: 17.5,
-    backgroundColor: '#444444',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  arrowText: { fontSize: 20, color: '#FFFFFF', marginTop: -2 },
-  answeredBadge: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    marginLeft: 10,
-  },
-  answeredBadgeText: { fontSize: 11, fontWeight: '600', color: '#FFF' },
+  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
-    top: 60,
-    left: 17,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    top: 56,
+    left: 20,
+    zIndex: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  /* Bottom Nav */
-  navBar: {
-    position: 'absolute',
-    bottom: 24,
-    left: 32,
-    right: 32,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(176, 137, 137, 0.13)',
+  /* Header */
+  headerCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#F5F5F5',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    borderColor: 'rgba(108,99,255,0.15)',
+    marginBottom: 16,
   },
-  navItem: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF' },
+  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
+
+  /* Stats */
+  statsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#16213E',
+    borderRadius: 14,
+    padding: 14,
     alignItems: 'center',
+    borderWidth: 1,
   },
-  navItemActive: { backgroundColor: '#FFFFFF' },
+  statNum: { fontSize: 22, fontWeight: '800' },
+  statLabel: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, fontWeight: '600' },
+
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#FFF', marginBottom: 14 },
+
+  /* Query Card */
+  queryCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  queryQuestion: { fontSize: 15, fontWeight: '600', color: '#FFF', lineHeight: 22, marginBottom: 12 },
+  queryFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  answeredBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  answeredText: { fontSize: 12, fontWeight: '600', color: '#4ECDC4' },
+  pendingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  pendingText: { fontSize: 12, fontWeight: '600', color: '#FF6B6B' },
+  editHint: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  editHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
+  answerHint: {
+    backgroundColor: 'rgba(108,99,255,0.12)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  answerHintText: { fontSize: 12, fontWeight: '700', color: '#6C63FF' },
+
+  /* Empty */
+  emptyCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 18,
+    padding: 40,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 14 },
 });

@@ -21,7 +21,7 @@ interface StudentItem {
 }
 
 export default function CourseStudents() {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const router = useRouter();
   const { courseId, courseName } = useLocalSearchParams<{ courseId: string; courseName: string }>();
 
@@ -41,24 +41,47 @@ export default function CourseStudents() {
       }
     };
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, token]);
+
+  const pendingCount = students.filter(s => s.has_pending).length;
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Back button */}
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
+        <Ionicons name="arrow-back" size={20} color="#FFF" />
+      </TouchableOpacity>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Intro Card */}
-        <View style={styles.introCard}>
-          <Text style={styles.introName}>{user?.name ?? 'Teacher'}</Text>
-          <Text style={styles.introSub}>Professor – {user?.roll ?? ''}</Text>
+        {/* Header */}
+        <View style={styles.headerCard}>
+          <Text style={styles.headerTitle}>{courseName}</Text>
+          <Text style={styles.headerSub}>Student Queries</Text>
+          {students.length > 0 && (
+            <View style={styles.headerStats}>
+              <View style={styles.headerStatItem}>
+                <Text style={styles.headerStatNum}>{students.length}</Text>
+                <Text style={styles.headerStatLabel}>Students</Text>
+              </View>
+              <View style={styles.headerStatDivider} />
+              <View style={styles.headerStatItem}>
+                <Text style={[styles.headerStatNum, { color: '#FF6B6B' }]}>{pendingCount}</Text>
+                <Text style={styles.headerStatLabel}>With Pending</Text>
+              </View>
+            </View>
+          )}
         </View>
 
-        <Text style={styles.sectionTitle}>{courseName} – Taught Classes</Text>
-
+        {/* Student List */}
         {loading ? (
-          <ActivityIndicator color="#FFF" style={{ marginTop: 20 }} />
+          <ActivityIndicator color="#6C63FF" style={{ marginTop: 40 }} />
         ) : students.length === 0 ? (
-          <Text style={styles.emptyText}>No students have asked questions yet</Text>
+          <View style={styles.emptyCard}>
+            <Ionicons name="people-outline" size={48} color="#555" />
+            <Text style={styles.emptyTitle}>No students yet</Text>
+            <Text style={styles.emptyText}>Students who ask questions will appear here</Text>
+          </View>
         ) : (
           students.map((s) => (
             <TouchableOpacity
@@ -78,164 +101,102 @@ export default function CourseStudents() {
                 })
               }
             >
-              {s.has_pending ? <View style={styles.redDot} /> : <View style={styles.greenDot} />}
-              <Text style={styles.studentRoll}>{s.student_roll}</Text>
-              <View style={styles.arrowCircle}>
-                <Text style={styles.arrowText}>{'>'}</Text>
+              <View style={[styles.statusDot, s.has_pending ? styles.dotPending : styles.dotClear]} />
+              <View style={styles.studentInfo}>
+                <Text style={styles.studentRoll}>{s.student_roll}</Text>
+                <Text style={styles.studentName}>{s.student_name}</Text>
               </View>
+              {s.has_pending && (
+                <View style={styles.pendingTag}>
+                  <Text style={styles.pendingTagText}>Pending</Text>
+                </View>
+              )}
+              <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.3)" />
             </TouchableOpacity>
           ))
         )}
       </ScrollView>
-
-      {/* Back button */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={22} color="#FFF" />
-      </TouchableOpacity>
-
-      {/* Bottom Nav Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => router.replace('/(teacher)/' as never)}>
-          <Ionicons name="home-outline" size={22} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="chatbox-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="heart-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="time-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="person-outline" size={22} color="#FFF" />
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2F2F2F' },
-  scrollContent: { paddingHorizontal: 17, paddingTop: 12, paddingBottom: 120 },
-
-  introCard: {
-    width: '100%',
-    height: 120,
-    backgroundColor: '#444444',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  introName: { fontSize: 22, fontWeight: '600', textAlign: 'center', color: '#FFFFFF', lineHeight: 33 },
-  introSub: { fontSize: 15, color: '#FFFFFF', textAlign: 'center', letterSpacing: 0.225, marginTop: 2 },
-
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.21,
-    marginTop: 24,
-    marginBottom: 14,
-  },
-  emptyText: { fontSize: 13, color: '#888', marginBottom: 8 },
-
-  /* Student Card */
-  studentCard: {
-    width: '100%',
-    height: 60,
-    backgroundColor: '#6F6F6F',
-    borderRadius: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  redDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#FF4444',
-    marginRight: 14,
-  },
-  greenDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#4CAF50',
-    marginRight: 14,
-  },
-  studentRoll: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    letterSpacing: 0.24,
-  },
-  arrowCircle: {
-    width: 35,
-    height: 35,
-    borderRadius: 17.5,
-    backgroundColor: '#444444',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  arrowText: { fontSize: 20, color: '#FFFFFF', marginTop: -2 },
+  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  scrollContent: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 40 },
 
   backBtn: {
     position: 'absolute',
-    top: 60,
-    left: 17,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    top: 56,
+    left: 20,
+    zIndex: 10,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  /* Bottom Nav */
-  navBar: {
-    position: 'absolute',
-    bottom: 24,
-    left: 32,
-    right: 32,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(176, 137, 137, 0.13)',
+  /* Header */
+  headerCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#F5F5F5',
+    borderColor: 'rgba(108,99,255,0.15)',
+  },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: '#FFF' },
+  headerSub: { fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 },
+  headerStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    marginTop: 18,
+    gap: 20,
   },
-  navItem: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  headerStatItem: { alignItems: 'center' },
+  headerStatNum: { fontSize: 20, fontWeight: '800', color: '#6C63FF' },
+  headerStatLabel: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
+  headerStatDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.1)' },
+
+  /* Student Card */
+  studentCard: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#16213E',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  navItemActive: { backgroundColor: '#FFFFFF' },
+  statusDot: { width: 10, height: 10, borderRadius: 5, marginRight: 14 },
+  dotPending: { backgroundColor: '#FF6B6B' },
+  dotClear: { backgroundColor: '#4ECDC4' },
+  studentInfo: { flex: 1 },
+  studentRoll: { fontSize: 15, fontWeight: '700', color: '#FFF' },
+  studentName: { fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 },
+  pendingTag: {
+    backgroundColor: 'rgba(255,107,107,0.12)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  pendingTagText: { fontSize: 11, fontWeight: '600', color: '#FF6B6B' },
+
+  /* Empty */
+  emptyCard: {
+    backgroundColor: '#16213E',
+    borderRadius: 18,
+    padding: 48,
+    alignItems: 'center',
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#FFF', marginTop: 16 },
+  emptyText: { fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6 },
 });

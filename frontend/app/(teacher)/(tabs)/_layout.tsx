@@ -6,9 +6,9 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const TAB_CONFIG: Record<string, { icon: keyof typeof Ionicons.glyphMap; activeIcon: keyof typeof Ionicons.glyphMap }> = {
   index: { icon: 'home-outline', activeIcon: 'home' },
-  faq: { icon: 'chatbox-outline', activeIcon: 'chatbox' },
-  'my-queries': { icon: 'time-outline', activeIcon: 'time' },
-  notifications: { icon: 'notifications-outline', activeIcon: 'notifications' },
+  queries: { icon: 'chatbox-outline', activeIcon: 'chatbox' },
+  history: { icon: 'time-outline', activeIcon: 'time' },
+  profile: { icon: 'person-outline', activeIcon: 'person' },
 };
 
 function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -55,18 +55,16 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   );
 }
 
-export default function StudentTabsLayout() {
+export default function TeacherTabsLayout() {
   return (
     <Tabs
       tabBar={(props) => <FloatingTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
-      <Tabs.Screen name="faq" options={{ title: 'FAQ' }} />
-      <Tabs.Screen name="my-queries" options={{ title: 'My Queries' }} />
-      <Tabs.Screen name="notifications" options={{ title: 'Notifications' }} />
+      <Tabs.Screen name="queries" options={{ title: 'Queries' }} />
+      <Tabs.Screen name="history" options={{ title: 'History' }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }
@@ -82,9 +80,8 @@ const styles = StyleSheet.create({
     height: 68,
     borderRadius: 34,
     backgroundColor: 'rgba(26, 26, 46, 0.92)',
-    borderWidth: 0,
-    opacity: 0.9,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',

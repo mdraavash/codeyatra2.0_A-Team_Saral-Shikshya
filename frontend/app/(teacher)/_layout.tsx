@@ -6,11 +6,11 @@ export default function TeacherLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#2F2F2F' },
+        contentStyle: { backgroundColor: '#1A1A2E' },
         animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen name="course-students" />
       <Stack.Screen name="student-queries" />
       <Stack.Screen name="answer-query" />
