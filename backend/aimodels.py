@@ -92,8 +92,6 @@ Return ONLY valid JSON: {{"emotion":"CONFUSED","confidence":0.85}}
 def get_embedding(text):
     return embeddings_model.embed(text)
 
-<<<<<<< HEAD
-
 def cosine_similarity(a, b):
     a = np.array(a, dtype=float)
     b = np.array(b, dtype=float)
@@ -104,34 +102,6 @@ def cosine_similarity(a, b):
         return 0.0
     return float(np.dot(a, b) / denom)
 
-=======
-# # ---- Vector Search ----
-# @app.get("/search")
-# def search(query: str):
-#     query_embedding = get_embedding(query)
-
-#     results = collection.aggregate([
-#         {
-#             "$vectorSearch": {
-#                 "index": "default",
-#                 "path": "embedding",
-#                 "queryVector": query_embedding,
-#                 "numCandidates": 100,
-#                 "limit": 5
-#             }
-#         },
-#         {
-#             "$project": {
-#                 "_id": 0,
-#                 "title": 1,
-#                 "content": 1,
-#                 "score": {"$meta": "vectorSearchScore"}
-#             }
-#         }
-#     ])
-
-#     return {"results": list(results)}
->>>>>>> f99923b2b923a38335862f01a9006a672ffee13b
 
 def find_best_match(query_vec, candidates, top_k=1):
     """Given a query embedding and a list of candidate docs (each must have 'embedding'),
