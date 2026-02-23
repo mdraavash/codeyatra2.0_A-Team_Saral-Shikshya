@@ -142,9 +142,6 @@ def cosine_similarity(a, b):
 
 
 def find_best_match(query_vec, candidates, top_k=1):
-    """Given a query embedding and a list of candidate docs (each must have 'embedding'),
-    return a list of best matches as tuples (candidate, score) sorted by score desc.
-    """
     scored = []
     for c in candidates:
         emb = c.get("embedding")
@@ -206,11 +203,6 @@ def find_best_match(query_vec, candidates, top_k=1):
 
 # ---- MongoDB Vector Search (Atlas Only) ----
 async def search_answered_questions_vector(db, query_embedding, course_id, limit=5):
-    """
-    Search answered questions using MongoDB vector search aggregation pipeline.
-    Requires $vectorSearch index on queries collection.
-    Uses cosine similarity for matching.
-    """
     try:
         pipeline = [
             {
@@ -247,11 +239,6 @@ async def search_answered_questions_vector(db, query_embedding, course_id, limit
 
 
 async def search_faq_vector(db, query_embedding, course_id, limit=5):
-    """
-    Search FAQs using MongoDB vector search aggregation pipeline.
-    Requires $vectorSearch index on embedded_questions collection.
-    Prioritizes by frequency.
-    """
     try:
         pipeline = [
             {
@@ -291,11 +278,6 @@ async def search_faq_vector(db, query_embedding, course_id, limit=5):
 
 
 async def search_global_answered_questions(db, query_embedding, limit=5):
-    """
-    Global search across all answered questions (any course).
-    Uses MongoDB vector search aggregation pipeline.
-    Requires vector search index on queries collection.
-    """
     try:
         pipeline = [
             {
