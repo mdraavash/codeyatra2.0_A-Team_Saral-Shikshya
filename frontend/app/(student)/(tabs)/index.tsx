@@ -70,7 +70,7 @@ export default function StudentHome() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   useFocusEffect(useCallback(() => { fetchData(); }, [token]));
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -100,11 +100,11 @@ export default function StudentHome() {
           <RefreshControl refreshing={refreshing} onRefresh={() => fetchData(true)} tintColor="#6C63FF" />
         }
       >
-        {/* Header Card */}
+       
         <View style={styles.headerCard}>
           <View style={styles.headerLeft}>
             <View style={styles.avatarCircle}>
-              <Ionicons name="person" size={28} color="#6C63FF" />
+              <Ionicons name="person" size={28} color="#2F2F2F" />
             </View>
             <View style={styles.headerInfo}>
               <Text style={styles.greeting}>Welcome back,</Text>
@@ -210,7 +210,7 @@ const CARD_WIDTH = (width - GRID_PADDING * 2 - COL_GAP) / 2;
 const CARD_COLORS = ['#6C63FF', '#FF6B6B', '#4ECDC4', '#FFD93D', '#A855F7', '#F97316'];
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2F2F2F' },
   scrollContent: { paddingHorizontal: GRID_PADDING, paddingTop: 8, paddingBottom: 110 },
 
   /* Header */
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
@@ -237,8 +237,8 @@ const styles = StyleSheet.create({
   },
   headerInfo: { flex: 1 },
   greeting: { fontSize: 12, color: '#888', letterSpacing: 0.3 },
-  userName: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
-  userRoll: { fontSize: 12, color: '#6C63FF', marginTop: 2, letterSpacing: 0.2 },
+  userName: { fontSize: 20, fontWeight: '700', color: '#F5F5F5', marginTop: 2 },
+  userRoll: { fontSize: 12, color: '#F5F5F5', marginTop: 2, letterSpacing: 0.2 },
   logoutIconBtn: {
     width: 40,
     height: 40,
@@ -279,14 +279,14 @@ const styles = StyleSheet.create({
   },
   viewAllLink: {
     fontSize: 13,
-    color: '#6C63FF',
+    color: '#F5F5F5',
     fontWeight: '600',
     marginBottom: 14,
   },
 
   /* Empty state */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 16,
     paddingVertical: 30,
     alignItems: 'center',
@@ -297,9 +297,9 @@ const styles = StyleSheet.create({
   },
   emptyText: { fontSize: 13, color: '#666' },
 
-  /* Notification Card */
+  
   notifCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
@@ -328,11 +328,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     columnGap: COL_GAP,
-    rowGap: 16,
+    rowGap: 5,
   },
   courseCard: {
     width: CARD_WIDTH,
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,

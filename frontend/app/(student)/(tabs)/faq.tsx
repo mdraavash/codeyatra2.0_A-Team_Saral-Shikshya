@@ -40,14 +40,14 @@ export default function FAQScreen() {
       const res = await fetch(API.FAQ_ALL, { headers });
       if (res.ok) setFaqs(await res.json());
     } catch {
-      // silent
+    
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+ 
   useFocusEffect(useCallback(() => { fetchFaqs(); }, [token]));
 
   const toggleExpand = (id: string) => {
@@ -57,7 +57,7 @@ export default function FAQScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#6C63FF" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#f5f5f5" style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -68,15 +68,15 @@ export default function FAQScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => fetchFaqs(true)} tintColor="#6C63FF" />
+          <RefreshControl refreshing={refreshing} onRefresh={() => fetchFaqs(true)} tintColor="#f5f5f5" />
         }
       >
         {/* Page Header */}
         <View style={styles.pageHeader}>
-          <Ionicons name="help-circle" size={28} color="#6C63FF" />
+          <Ionicons name="help-circle" size={28} color="#f5f5f5" />
           <View style={styles.pageHeaderText}>
-            <Text style={styles.pageTitle}>FAQ</Text>
-            <Text style={styles.pageSubtitle}>Frequently Asked Questions across all courses</Text>
+            <Text style={styles.pageTitle}>All queries</Text>
+            <Text style={styles.pageSubtitle}>Asked Questions across all courses</Text>
           </View>
         </View>
 
@@ -131,7 +131,7 @@ export default function FAQScreen() {
                       }
                     >
                       <Text style={styles.viewFullBtnText}>View Full Answer</Text>
-                      <Ionicons name="expand-outline" size={16} color="#6C63FF" />
+                      <Ionicons name="expand-outline" size={16} color="#f5f5f5" />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -145,7 +145,7 @@ export default function FAQScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2f2f2f' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
 
   /* Page Header */
@@ -157,12 +157,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   pageHeaderText: { flex: 1 },
-  pageTitle: { fontSize: 22, fontWeight: '700', color: '#FFFFFF' },
+  pageTitle: { fontSize: 22, fontWeight: '700', color: '#f5f5f5' },
   pageSubtitle: { fontSize: 13, color: '#888', marginTop: 4 },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     paddingVertical: 50,
     alignItems: 'center',
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
 
   /* FAQ Card */
   faqCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 18,
     marginBottom: 12,
@@ -197,8 +197,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
   },
-  faqBadgeText: { fontSize: 11, fontWeight: '700', color: '#6C63FF', textTransform: 'uppercase' },
-  faqQuestion: { fontSize: 15, fontWeight: '600', color: '#FFFFFF', lineHeight: 22 },
+  faqBadgeText: { fontSize: 11, fontWeight: '700', color: '#f5f5f5', textTransform: 'uppercase' },
+  faqQuestion: { fontSize: 15, fontWeight: '600', color: '#f5f5f5', lineHeight: 22 },
 
   /* Answer section */
   faqAnswerSection: { marginTop: 10 },
@@ -216,5 +216,5 @@ const styles = StyleSheet.create({
     marginTop: 14,
     alignSelf: 'flex-end',
   },
-  viewFullBtnText: { fontSize: 13, fontWeight: '600', color: '#6C63FF' },
+  viewFullBtnText: { fontSize: 13, fontWeight: '600', color: '#f5f5f5' },
 });

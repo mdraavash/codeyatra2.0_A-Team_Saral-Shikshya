@@ -108,7 +108,6 @@ export default function AdminDashboard() {
     }
   };
 
-  /* ── Delete Teacher ── */
   const handleDeleteTeacher = (t: Teacher) => {
     Alert.alert('Delete Teacher', `Remove "${t.name}" and all assigned subjects?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -123,7 +122,6 @@ export default function AdminDashboard() {
     ]);
   };
 
-  /* ── Create Subject ── */
   const handleCreateSubject = async () => {
     if (!sName.trim() || !selectedTeacherId) {
       Alert.alert('Error', 'Subject name and teacher are required');

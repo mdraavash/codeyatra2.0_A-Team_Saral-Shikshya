@@ -46,12 +46,11 @@ export default function CourseDetail() {
       }
     };
     load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId, token]);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Bar */}
+      
       <View style={styles.headerBar}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} activeOpacity={0.7}>
           <Ionicons name="arrow-back" size={22} color="#FFF" />
@@ -73,7 +72,6 @@ export default function CourseDetail() {
           <Text style={styles.courseInfoTeacher}>Instructor: {teacherName}</Text>
         </View>
 
-        {/* Action Cards */}
         <View style={styles.actionsRow}>
           <TouchableOpacity
             style={styles.actionCard}
@@ -110,7 +108,6 @@ export default function CourseDetail() {
           </TouchableOpacity>
         </View>
 
-        {/* FAQ Section */}
         <View style={styles.sectionHeader}>
           <Ionicons name="help-circle-outline" size={20} color="#FFD93D" />
           <Text style={styles.sectionTitle}>Frequently Asked</Text>

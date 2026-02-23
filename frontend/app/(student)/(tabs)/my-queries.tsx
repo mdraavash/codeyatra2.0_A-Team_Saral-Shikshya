@@ -63,7 +63,7 @@ export default function MyQueriesScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#6C63FF" style={{ flex: 1 }} />
+        <ActivityIndicator size="large" color="#f5f5f5" style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -74,12 +74,12 @@ export default function MyQueriesScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => fetchQueries(true)} tintColor="#6C63FF" />
+          <RefreshControl refreshing={refreshing} onRefresh={() => fetchQueries(true)} tintColor="#f5f5f5" />
         }
       >
         {/* Page Header */}
         <View style={styles.pageHeader}>
-          <Ionicons name="document-text" size={28} color="#6C63FF" />
+          <Ionicons name="document-text" size={28} color="#f5f5f5" />
           <View style={styles.pageHeaderText}>
             <Text style={styles.pageTitle}>My Queries</Text>
             <Text style={styles.pageSubtitle}>Track all your questions</Text>
@@ -164,7 +164,7 @@ export default function MyQueriesScreen() {
                   <Text style={styles.queryAnswer} numberOfLines={2}>{q.answer}</Text>
                   <View style={styles.tapHint}>
                     <Text style={styles.tapHintText}>Tap to view full answer</Text>
-                    <Ionicons name="expand-outline" size={14} color="#6C63FF" />
+                    <Ionicons name="expand-outline" size={14} color="#f5f5f5" />
                   </View>
                 </View>
               ) : (
@@ -182,7 +182,7 @@ export default function MyQueriesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1A1A2E' },
+  container: { flex: 1, backgroundColor: '#2f2f2f' },
   scrollContent: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 110 },
 
   /* Page Header */
@@ -205,14 +205,14 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(108, 99, 255, 0.2)',
   },
-  statNumber: { fontSize: 24, fontWeight: '800', color: '#6C63FF' },
+  statNumber: { fontSize: 24, fontWeight: '800', color: '#f5f5f5' },
   statLabel: { fontSize: 11, color: '#888', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
 
   /* Filters */
@@ -221,20 +221,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
   filterChipActive: {
-    backgroundColor: '#6C63FF',
-    borderColor: '#6C63FF',
+    backgroundColor: '#f5f5f5',
+    borderColor: '#f5f5f5',
   },
   filterChipText: { fontSize: 13, fontWeight: '600', color: '#888' },
   filterChipTextActive: { color: '#FFF' },
 
   /* Empty */
   emptyCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 20,
     paddingVertical: 50,
     alignItems: 'center',
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
 
   /* Query Card */
   queryCard: {
-    backgroundColor: '#16213E',
+    backgroundColor: '#444444',
     borderRadius: 16,
     padding: 18,
     marginBottom: 12,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
   },
-  queryBadgeText: { fontSize: 11, fontWeight: '700', color: '#6C63FF', textTransform: 'uppercase' },
+  queryBadgeText: { fontSize: 11, fontWeight: '700', color: '#f5f5f5', textTransform: 'uppercase' },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: 'flex-end',
   },
-  tapHintText: { fontSize: 12, fontWeight: '600', color: '#6C63FF' },
+  tapHintText: { fontSize: 12, fontWeight: '600', color: '#f5f5f5' },
 
   /* Pending */
   pendingRow: {

@@ -73,7 +73,7 @@ export default function AnswerDetail() {
       });
       if (res.ok) {
         setExistingRating(rating);
-        Alert.alert('Thank you!', 'Your rating has been submitted successfully.');
+        Alert.alert('Thank you!', existingRating ? 'Your rating has been updated.' : 'Your rating has been submitted successfully.');
       } else {
         const data = await res.json();
         Alert.alert('Error', data.detail || 'Failed to submit rating');
@@ -92,7 +92,7 @@ export default function AnswerDetail() {
           <TouchableOpacity
             key={star}
             onPress={() => interactive && setRating(star)}
-            disabled={!interactive || !!existingRating}
+            disabled={!interactive}
             activeOpacity={interactive ? 0.6 : 1}
             style={styles.starBtn}
           >
@@ -150,7 +150,7 @@ export default function AnswerDetail() {
           </Text>
           <Text style={styles.ratingSubtitle}>
             {existingRating
-              ? 'Thanks for your feedback!'
+              ? 'Tap the stars to update your rating'
               : 'Help us improve by rating your teacher\'s response'}
           </Text>
 
@@ -170,25 +170,23 @@ export default function AnswerDetail() {
                 </Text>
               )}
 
-              {!existingRating && (
-                <TouchableOpacity
-                  style={[styles.submitBtn, rating === 0 && styles.submitBtnDisabled]}
-                  onPress={handleSubmitRating}
-                  disabled={submitting || rating === 0}
-                  activeOpacity={0.7}
-                >
-                  {submitting ? (
-                    <ActivityIndicator color="#FFF" size="small" />
-                  ) : (
-                    <>
-                      <Ionicons name="send" size={18} color="#FFF" />
-                      <Text style={styles.submitBtnText}>Submit Rating</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[styles.submitBtn, (rating === 0 || (existingRating !== null && rating === existingRating)) && styles.submitBtnDisabled]}
+                onPress={handleSubmitRating}
+                disabled={submitting || rating === 0 || (existingRating !== null && rating === existingRating)}
+                activeOpacity={0.7}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  <>
+                    <Ionicons name={existingRating ? 'create-outline' : 'send'} size={18} color="#FFF" />
+                    <Text style={styles.submitBtnText}>{existingRating ? 'Update Rating' : 'Submit Rating'}</Text>
+                  </>
+                )}
+              </TouchableOpacity>
 
-              {existingRating && (
+              {existingRating && rating === existingRating && (
                 <View style={styles.submittedBadge}>
                   <Ionicons name="checkmark-circle" size={18} color="#4ECDC4" />
                   <Text style={styles.submittedText}>Rating submitted</Text>

@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Alert,
+  Modal,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -30,6 +30,9 @@ export default function AnswerQuery() {
   const isEditing = !!existingAnswer;
   const [answer, setAnswer] = useState(existingAnswer ?? '');
   const [submitting, setSubmitting] = useState(false);
+  const [popup, setPopup] = useState<{ visible: boolean; success: boolean; message: string }>({
+    visible: false, success: false, message: '',
+  });
 
   const handleSubmit = async () => {
     const trimmed = answer.trim();
@@ -45,18 +48,27 @@ export default function AnswerQuery() {
         body: JSON.stringify({ answer: trimmed }),
       });
       if (res.ok) {
-        Alert.alert('Success', isEditing ? 'Answer updated!' : 'Answer submitted!', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
+        setPopup({
+          visible: true,
+          success: true,
+          message: isEditing ? 'Answer updated successfully!' : 'Your answer has been submitted!',
+        });
         return;
       } else {
         const data = await res.json();
-        Alert.alert('Error', data.detail || 'Something went wrong');
+        setPopup({ visible: true, success: false, message: data.detail || 'Something went wrong' });
       }
     } catch {
-      Alert.alert('Error', 'Network error');
+      setPopup({ visible: true, success: false, message: 'Network error. Please try again.' });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handlePopupDismiss = () => {
+    setPopup({ visible: false, success: false, message: '' });
+    if (popup.success) {
+      router.replace('/(teacher)/' as never);
     }
   };
 
@@ -114,6 +126,28 @@ export default function AnswerQuery() {
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Success/Error Popup Modal */}
+      <Modal transparent visible={popup.visible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={[styles.modalIconWrap, popup.success ? styles.modalIconSuccess : styles.modalIconError]}>
+              <Ionicons
+                name={popup.success ? 'checkmark-circle' : 'close-circle'}
+                size={48}
+                color={popup.success ? '#4ECDC4' : '#FF6B6B'}
+              />
+            </View>
+            <Text style={styles.modalTitle}>
+              {popup.success ? 'Query Resolved' : 'Error'}
+            </Text>
+            <Text style={styles.modalMessage}>{popup.message}</Text>
+            <TouchableOpacity style={styles.modalBtn} onPress={handlePopupDismiss} activeOpacity={0.7}>
+              <Text style={styles.modalBtnText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -206,4 +240,41 @@ const styles = StyleSheet.create({
   },
   submitBtnDisabled: { opacity: 0.4 },
   submitText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
+
+  /* Modal */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#16213E',
+    borderRadius: 24,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  modalIconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalIconSuccess: { backgroundColor: 'rgba(78,205,196,0.12)' },
+  modalIconError: { backgroundColor: 'rgba(255,107,107,0.12)' },
+  modalTitle: { fontSize: 22, fontWeight: '800', color: '#FFF', marginBottom: 8 },
+  modalMessage: { fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 20, marginBottom: 24 },
+  modalBtn: {
+    backgroundColor: '#6C63FF',
+    paddingHorizontal: 48,
+    paddingVertical: 14,
+    borderRadius: 16,
+  },
+  modalBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 });
